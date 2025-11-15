@@ -42,15 +42,6 @@
   {{- end -}}
 {{- end -}}
 
-{{- $proxyNames := "" -}}
-{{- range $proxy := $supportedProxies -}}
-  {{- if eq $proxyNames "" -}}
-    {{- $proxyNames = printf "%q" $proxy.Name -}}
-  {{- else -}}
-    {{- $proxyNames = printf "%s, %q" $proxyNames $proxy.Name -}}
-  {{- end -}}
-{{- end -}}
-
 # {{ .SiteName }}-{{ .SubscribeName }}
 # Traffic: {{ $used }} GiB/{{ $total }} GiB | Expires: {{ $ExpiredAt }}
 # Generated at: {{ now | date "2006-01-02 15:04:05" }}
@@ -59,8 +50,8 @@ mode: rule
 ipv6: true
 allow-lan: true
 bind-address: '*'
-mixed-port: 10808
-log-level: info
+mixed-port: 6088
+log-level: error
 unified-delay: true
 tcp-concurrent: true
 external-controller: '0.0.0.0:9090'
@@ -83,7 +74,7 @@ dns:
 
 proxies:
 {{- range $proxy := $supportedProxies }}
-  {{- $common := "udp: true, tfo: true" -}}
+  {{- $common := "udp: true" -}}
 
   {{- $server := $proxy.Server -}}
   {{- if and (contains $server ":") (not (hasPrefix "[" $server)) -}}
@@ -108,205 +99,656 @@ proxies:
   {{- if eq $proxy.Type "shadowsocks" }}
   - { name: {{ $proxy.Name | quote }}, type: ss, server: {{ $server }}, port: {{ $proxy.Port }}, cipher: {{ default "aes-128-gcm" $proxy.Method }}, password: {{ $password }}, {{ $common }}{{- if ne (default "" $proxy.Obfs) "" }}, plugin: obfs, plugin-opts: { mode: {{ $proxy.Obfs }}, host: {{ default "" $proxy.ObfsHost }} }{{- end }} }
   {{- else if eq $proxy.Type "vmess" }}
-  - { name: {{ $proxy.Name | quote }}, type: vmess, server: {{ $server }}, port: {{ $proxy.Port }}, uuid: {{ $password }}, alterId: 0, cipher: auto, {{ $common }}{{- if or (eq $proxy.Transport "websocket") (eq $proxy.Transport "ws") }}, network: ws, ws-opts: { path: {{ default "/" $proxy.Path }}{{- if ne (default "" $proxy.Host) "" }}, headers: { Host: {{ $proxy.Host }} }{{- end }} }{{- else if eq $proxy.Transport "http" }}, network: http, http-opts: { method: GET, path: [{{ default "/" $proxy.Path | quote }}]{{- if ne (default "" $proxy.Host) "" }}, headers: { Host: [{{ $proxy.Host | quote }}] }{{- end }} }{{- else if eq $proxy.Transport "grpc" }}, network: grpc, grpc-opts: { grpc-service-name: {{ default "grpc" $proxy.ServiceName }} }{{- end }}{{- if or (eq $proxy.Security "tls") (eq $proxy.Security "reality") }}, tls: true{{- end }}{{- if ne (default "" $proxy.SNI) "" }}, servername: {{ $proxy.SNI }}{{- end }}{{- if $SkipVerify }}, skip-cert-verify: true{{- end }}{{- if ne (default "" $proxy.Fingerprint) "" }}, client-fingerprint: {{ $proxy.Fingerprint }}{{- end }} }
+  - { name: {{ $proxy.Name | quote }}, type: vmess, server: {{ $server }}, port: {{ $proxy.Port }}, uuid: {{ $password }}, alterId: 0, cipher: auto, {{ $common }}{{- if or (eq $proxy.Transport "websocket") (eq $proxy.Transport "ws") }}, network: ws, ws-opts: { path: {{ default "/" $proxy.Path }}{{- if ne (default "" $proxy.Host) "" }}, headers: { Host: {{ $proxy.Host }} }{{- end }} }{{- else if eq $proxy.Transport "http" }}, network: http, http-opts: { method: GET, path: [{{ default "/" $proxy.Path | quote }}]{{- if ne (default "" $proxy.Host) "" }}, headers: { Host: [{{ $proxy.Host | quote }}] }{{- end }} }{{- else if eq $proxy.Transport "grpc" }}, network: grpc, grpc-opts: { grpc-service-name: {{ default "grpc" $proxy.ServiceName }} }{{- end }}{{- if or (eq $proxy.Security "tls") (eq $proxy.Security "reality") }}, tls: true{{- end }}{{- if ne (default "" $proxy.SNI) "" }}, servername: {{ $proxy.SNI }}{{- end }}{{- if $SkipVerify }}, skip-cert-verify: true{{- end }}{{- if ne (default "" $proxy.Fingerprint) "" }}, fingerprint: {{ $proxy.Fingerprint }}{{- end }} }
   {{- else if eq $proxy.Type "vless" }}
-  {{- $encryptionStr := "" -}}
-  {{- $encryption := default "none" $proxy.Encryption -}}
-  {{- if eq $encryption "none" -}}
-    {{- $encryptionStr = "none" -}}
-  {{- else -}}
-    {{- $encParts := list -}}
-    {{- $encParts = append $encParts $encryption -}}
-    {{- if ne (default "" $proxy.Encryption_Mode) "" -}}
-      {{- $encParts = append $encParts $proxy.Encryption_Mode -}}
-    {{- end -}}
-    {{- if ne (default "" $proxy.EncryptionRtt) "" -}}
-      {{- $encParts = append $encParts $proxy.EncryptionRtt -}}
-    {{- end -}}
-    {{- if ne (default "" $proxy.EncryptionClientPadding) "" -}}
-      {{- $encParts = append $encParts $proxy.EncryptionClientPadding -}}
-    {{- end -}}
-    {{- if ne (default "" $proxy.EncryptionPassword) "" -}}
-      {{- $encParts = append $encParts $proxy.EncryptionPassword -}}
-    {{- end -}}
-    {{- $encryptionStr = join "." $encParts -}}
-  {{- end }}
-  - { name: {{ $proxy.Name | quote }}, type: vless, server: {{ $server }}, port: {{ $proxy.Port }}, uuid: {{ $password }}, {{ $common }}, encryption: {{ $encryptionStr }}{{- if ne (default "" $proxy.Flow) "" }}, flow: {{ $proxy.Flow }}{{- end }}{{- if or (eq $proxy.Transport "ws") (eq $proxy.Transport "websocket") }}, network: ws, ws-opts: { path: {{ default "/" $proxy.Path }}{{- if ne (default "" $proxy.Host) "" }}, headers: { Host: {{ $proxy.Host }} }{{- end }} }{{- else if eq $proxy.Transport "http" }}, network: http, http-opts: { method: GET, path: [{{ default "/" $proxy.Path | quote }}]{{- if ne (default "" $proxy.Host) "" }}, headers: { Host: [{{ $proxy.Host | quote }}] }{{- end }} }{{- else if eq $proxy.Transport "httpupgrade" }}, network: httpupgrade, httpupgrade-opts: { path: {{ default "/" $proxy.Path }}{{- if ne (default "" $proxy.Host) "" }}, headers: { Host: {{ $proxy.Host }} }{{- end }} }{{- else if eq $proxy.Transport "xhttp" }}, network: xhttp, xhttp-opts: { path: {{ default "/" $proxy.Path }}{{- if ne (default "" $proxy.Host) "" }}, headers: { Host: {{ $proxy.Host }} }{{- end }} }{{- else if eq $proxy.Transport "grpc" }}, network: grpc, grpc-opts: { grpc-service-name: {{ default "grpc" $proxy.ServiceName }} }{{- end }}{{- if eq $proxy.Security "tls" }}, tls: true{{- end }}{{- if ne (default "" $proxy.SNI) "" }}, servername: {{ $proxy.SNI }}{{- end }}{{- if $proxy.AllowInsecure }}, skip-cert-verify: true{{- end }}{{- if ne (default "" $proxy.Fingerprint) "" }}, client-fingerprint: {{ $proxy.Fingerprint }}{{- end }}{{- if and (eq $proxy.Security "reality") (ne (default "" $proxy.RealityPublicKey) "") }}, reality-opts: { public-key: {{ $proxy.RealityPublicKey }}{{- if ne (default "" $proxy.RealityShortId) "" }}, short-id: {{ $proxy.RealityShortId }}{{- end }} }{{- end }} }
+  - { name: {{ $proxy.Name | quote }}, type: vless, server: {{ $server }}, port: {{ $proxy.Port }}, uuid: {{ $password }}, {{ $common }}{{- if or (eq $proxy.Transport "ws") (eq $proxy.Transport "websocket") }}, network: ws, ws-opts: { path: {{ default "/" $proxy.Path }}{{- if ne (default "" $proxy.Host) "" }}, headers: { Host: {{ $proxy.Host }} }{{- end }} }{{- else if eq $proxy.Transport "http" }}, network: http, http-opts: { method: GET, path: [{{ default "/" $proxy.Path | quote }}]{{- if ne (default "" $proxy.Host) "" }}, headers: { Host: [{{ $proxy.Host | quote }}] }{{- end }} }{{- else if eq $proxy.Transport "httpupgrade" }}, network: httpupgrade, httpupgrade-opts: { path: {{ default "/" $proxy.Path }}{{- if ne (default "" $proxy.Host) "" }}, headers: { Host: {{ $proxy.Host }} }{{- end }} }{{- else if eq $proxy.Transport "grpc" }}, network: grpc, grpc-opts: { grpc-service-name: {{ default "grpc" $proxy.ServiceName }} }{{- end }}{{- if ne (default "" $proxy.SNI) "" }}, servername: {{ $proxy.SNI }}{{- end }}{{- if $SkipVerify }}, skip-cert-verify: true{{- end }}{{- if ne (default "" $proxy.Fingerprint) "" }}, client-fingerprint: {{ $proxy.Fingerprint }}{{- end }}{{- if and (eq $proxy.Security "reality") (ne (default "" $proxy.RealityPublicKey) "") }}, tls: true, reality-opts: { public-key: {{ $proxy.RealityPublicKey }}{{- if ne (default "" $proxy.RealityShortId) "" }}, short-id: {{ $proxy.RealityShortId }}{{- end }} }{{- end }}{{- if ne (default "" $proxy.Flow) "none" }}, flow: {{ $proxy.Flow }}{{- end }} }
   {{- else if eq $proxy.Type "trojan" }}
-  - { name: {{ $proxy.Name | quote }}, type: trojan, server: {{ $server }}, port: {{ $proxy.Port }}, password: {{ $password }}, {{ $common }}{{- if eq $proxy.Security "tls" }}, tls: true{{- end }}{{- if ne (default "" $proxy.SNI) "" }}, sni: {{ $proxy.SNI }}{{- end }}{{- if $SkipVerify }}, skip-cert-verify: true{{- end }}{{- if ne (default "" $proxy.Fingerprint) "" }}, client-fingerprint: {{ $proxy.Fingerprint }}{{- end }}{{- if and (eq $proxy.Security "reality") (ne (default "" $proxy.RealityPublicKey) "") }}, reality-opts: { public-key: {{ $proxy.RealityPublicKey }}{{- if ne (default "" $proxy.RealityShortId) "" }}, short-id: {{ $proxy.RealityShortId }}{{- end }} }{{- end }}{{- if or (eq $proxy.Transport "ws") (eq $proxy.Transport "websocket") }}, network: ws, ws-opts: { path: {{ default "/" $proxy.Path }}{{- if ne (default "" $proxy.Host) "" }}, headers: { Host: {{ $proxy.Host }} }{{- end }} }{{- else if eq $proxy.Transport "http" }}, network: http, http-opts: { method: GET, path: [{{ default "/" $proxy.Path | quote }}]{{- if ne (default "" $proxy.Host) "" }}, headers: { Host: [{{ $proxy.Host | quote }}] }{{- end }} }{{- else if eq $proxy.Transport "grpc" }}, network: grpc, grpc-opts: { grpc-service-name: {{ default "grpc" $proxy.ServiceName }} }{{- end }} }
+  - { name: {{ $proxy.Name | quote }}, type: trojan, server: {{ $server }}, port: {{ $proxy.Port }}, password: {{ $password }}, {{ $common }}{{- if ne (default "" $proxy.SNI) "" }}, sni: {{ $proxy.SNI }}{{- end }}{{- if $SkipVerify }}, skip-cert-verify: true{{- end }}{{- if ne (default "" $proxy.Fingerprint) "" }}, fingerprint: {{ $proxy.Fingerprint }}{{- end }}{{- if and (eq $proxy.Security "reality") (ne (default "" $proxy.RealityPublicKey) "") }}, reality-opts: { public-key: {{ $proxy.RealityPublicKey }}{{- if ne (default "" $proxy.RealityShortId) "" }}, short-id: {{ $proxy.RealityShortId }}{{- end }} }{{- end }}{{- if or (eq $proxy.Transport "ws") (eq $proxy.Transport "websocket") }}, network: ws, ws-opts: { path: {{ default "/" $proxy.Path }}{{- if ne (default "" $proxy.Host) "" }}, headers: { Host: {{ $proxy.Host }} }{{- end }} }{{- else if eq $proxy.Transport "http" }}, network: http, http-opts: { method: GET, path: [{{ default "/" $proxy.Path | quote }}]{{- if ne (default "" $proxy.Host) "" }}, headers: { Host: [{{ $proxy.Host | quote }}] }{{- end }} }{{- else if eq $proxy.Transport "grpc" }}, network: grpc, grpc-opts: { grpc-service-name: {{ default "grpc" $proxy.ServiceName }} }{{- end }} }
   {{- else if or (eq $proxy.Type "hysteria2") (eq $proxy.Type "hysteria") }}
-  - { name: {{ $proxy.Name | quote }}, type: hysteria2, server: {{ $server }}, port: {{ $proxy.Port }}, password: {{ $password }}, {{ $common }}{{- if ne (default "" $proxy.SNI) "" }}, sni: {{ $proxy.SNI }}{{- end }}{{- if $proxy.AllowInsecure }}, skip-cert-verify: true{{- end }}{{- if ne (default "" $proxy.ObfsPassword) "" }}, obfs: salamander, obfs-password: {{ $proxy.ObfsPassword }}{{- end }}{{- if ne (default "" $proxy.HopPorts) "" }}, ports: {{ $proxy.HopPorts }}{{- end }}{{- if ne (default 0 $proxy.HopInterval) 0 }}, hop-interval: {{ $proxy.HopInterval }}{{- end }}{{- if ne (default "" (printf "%v" $proxy.UpMbps)) "" }}, up: "{{ $proxy.UpMbps }} Mbps"{{- end }}{{- if ne (default "" (printf "%v" $proxy.DownMbps)) "" }}, down: "{{ $proxy.DownMbps }} Mbps"{{- end }} }
+  - { name: {{ $proxy.Name | quote }}, type: hysteria2, server: {{ $server }}, port: {{ $proxy.Port }}, password: {{ $password }}, {{ $common }}{{- if ne (default "" $proxy.SNI) "" }}, sni: {{ $proxy.SNI }}{{- end }}{{- if $proxy.AllowInsecure }}, skip-cert-verify: true{{- end }}{{- if ne (default "" $proxy.ObfsPassword) "" }}, obfs: salamander, obfs-password: {{ $proxy.ObfsPassword }}{{- end }}{{- if ne (default "" $proxy.HopPorts) "" }}, ports: {{ $proxy.HopPorts }}{{- end }}{{- if ne (default 0 $proxy.HopInterval) 0 }}, hop-interval: {{ $proxy.HopInterval }}{{- end }} }
   {{- else if eq $proxy.Type "tuic" }}
   - { name: {{ $proxy.Name | quote }}, type: tuic, server: {{ $server }}, port: {{ $proxy.Port }}, uuid: {{ default "" $proxy.ServerKey }}, password: {{ $password }}, {{ $common }}{{- if ne (default "" $proxy.SNI) "" }}, sni: {{ $proxy.SNI }}{{- end }}{{- if $proxy.AllowInsecure }}, skip-cert-verify: true{{- end }}{{- if $proxy.DisableSNI }}, disable-sni: true{{- end }}{{- if $proxy.ReduceRtt }}, reduce-rtt: true{{- end }}{{- if ne (default "" $proxy.UDPRelayMode) "" }}, udp-relay-mode: {{ $proxy.UDPRelayMode }}{{- end }}{{- if ne (default "" $proxy.CongestionController) "" }}, congestion-controller: {{ $proxy.CongestionController }}{{- end }} }
   {{- else if eq $proxy.Type "wireguard" }}
   - { name: {{ $proxy.Name | quote }}, type: wireguard, server: {{ $server }}, port: {{ $proxy.Port }}, private-key: {{ default "" $proxy.ServerKey }}, public-key: {{ default "" $proxy.RealityPublicKey }}, {{ $common }}{{- if ne (default "" $proxy.Path) "" }}, preshared-key: {{ $proxy.Path }}{{- end }}{{- if ne (default "" $proxy.RealityServerAddr) "" }}, ip: {{ $proxy.RealityServerAddr }}{{- end }}{{- if ne (default 0 $proxy.RealityServerPort) 0 }}, ipv6: {{ $proxy.RealityServerPort }}{{- end }} }
   {{- else if eq $proxy.Type "anytls" }}
-  - { name: {{ $proxy.Name | quote }}, type: anytls, server: {{ $server }}, port: {{ $proxy.Port }}, password: {{ $password }}, {{ $common }}{{- if ne (default "" $proxy.SNI) "" }}, sni: {{ $proxy.SNI }}{{- end }}{{- if $proxy.AllowInsecure }}, skip-cert-verify: true{{- end }}{{- if ne (default "" $proxy.Fingerprint) "" }}, client-fingerprint: {{ $proxy.Fingerprint }}{{- end }} }
+  - { name: {{ $proxy.Name | quote }}, type: anytls, server: {{ $server }}, port: {{ $proxy.Port }}, password: {{ $password }}, {{ $common }}{{- if ne (default "" $proxy.SNI) "" }}, sni: {{ $proxy.SNI }}{{- end }}{{- if $proxy.AllowInsecure }}, skip-cert-verify: true{{- end }}{{- if ne (default "" $proxy.Fingerprint) "" }}, fingerprint: {{ $proxy.Fingerprint }}{{- end }} }
   {{- else }}
   - { name: {{ $proxy.Name | quote }}, type: {{ $proxy.Type }}, server: {{ $server }}, port: {{ $proxy.Port }}, {{ $common }} }
   {{- end }}
 {{- end }}
 
+# === 以下为你要求的新分组样式 ===
 proxy-groups:
-  - { name: 🚀 Proxy, type: select, proxies: [🌏 Auto, 🎯 Direct, {{ $proxyNames }}] }
-  - { name: 🍎 Apple, type: select, proxies: [🚀 Proxy, 🎯 Direct, {{ $proxyNames }}] }
-  - { name: 🔍 Google, type: select, proxies: [🚀 Proxy, 🎯 Direct, {{ $proxyNames }}] }
-  - { name: 🪟 Microsoft, type: select, proxies: [🚀 Proxy, 🎯 Direct, {{ $proxyNames }}] }
-  - { name: 📺 GlobalMedia, type: select, proxies: [🚀 Proxy, 🎯 Direct, {{ $proxyNames }}] }
-  - { name: 📟 Telegram, type: select, proxies: [🚀 Proxy, 🎯 Direct, {{ $proxyNames }}] }
-  - { name: 🤖 AI, type: select, proxies: [🚀 Proxy, 🎯 Direct, {{ $proxyNames }}] }
-  - { name: 🪙 Crypto, type: select, proxies: [🚀 Proxy, 🎯 Direct, {{ $proxyNames }}] }
-  - { name: 🎮 Game, type: select, proxies: [🚀 Proxy, 🎯 Direct, {{ $proxyNames }}] }
-  - { name: 🇨🇳 China, type: select, proxies: [🎯 Direct, 🚀 Proxy, {{ $proxyNames }}] }
-  - { name: 🎯 Direct, type: select, proxies: [DIRECT], hidden: true }
-  - { name: 🐠 Final, type: select, proxies: [🚀 Proxy, 🎯 Direct, {{ $proxyNames }}] }
-  - { name: 🌏 Auto, type: url-test, proxies: [{{ $proxyNames }}] }
-
-rules:
-  - RULE-SET, Apple, 🍎 Apple
-  - RULE-SET, Google, 🔍 Google
-  - RULE-SET, Microsoft, 🪟 Microsoft
-  - RULE-SET, Github, 🪟 Microsoft
-  - RULE-SET, HBO, 📺 GlobalMedia
-  - RULE-SET, Disney, 📺 GlobalMedia
-  - RULE-SET, TikTok, 📺 GlobalMedia
-  - RULE-SET, Netflix, 📺 GlobalMedia
-  - RULE-SET, GlobalMedia, 📺 GlobalMedia
-  - RULE-SET, Telegram, 📟 Telegram
-  - RULE-SET, OpenAI, 🤖 AI
-  - RULE-SET, Gemini, 🤖 AI
-  - RULE-SET, Copilot, 🤖 AI
-  - RULE-SET, Claude, 🤖 AI
-  - RULE-SET, Crypto, 🪙 Crypto
-  - RULE-SET, Cryptocurrency, 🪙 Crypto
-  - RULE-SET, Game, 🎮 Game
-  - RULE-SET, Global, 🚀 Proxy
-  - RULE-SET, ChinaMax, 🇨🇳 China
-  - RULE-SET, Lan, 🎯 Direct
-  - GEOIP, CN, 🇨🇳 China
-  - MATCH, 🐠 Final
+  - name: 节点选择
+    icon: https://cdn.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Proxy.png
+    type: select
+    proxies:
+      - 自动选择
+      - 香港节点
+      - 台湾节点
+      - 狮城节点
+      - 日本节点
+      - 美国节点
+      - 韩国节点
+      - 手动切换
+      - DIRECT
+  - name: 手动切换
+    icon: https://cdn.jsdelivr.net/gh/shindgewongxj/WHATSINStash@master/icon/select.png
+    include-all: true
+    type: select
+  - name: 自动选择
+    icon: https://cdn.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Auto.png
+    type: url-test
+    include-all: true
+    interval: 300
+    tolerance: 50
+  - name: 电报消息
+    icon: https://cdn.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Telegram.png
+    type: select
+    proxies:
+      - 自动选择
+      - 节点选择
+      - 狮城节点
+      - 香港节点
+      - 台湾节点
+      - 日本节点
+      - 美国节点
+      - 韩国节点
+      - 手动切换
+      - DIRECT
+  - name: AI平台
+    icon: https://cdn.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Bot.png
+    type: select
+    proxies:
+      - 狮城节点
+      - 台湾节点
+      - 日本节点
+      - 美国节点
+      - 韩国节点
+      - 香港节点
+      - 自动选择
+      - 节点选择
+      - 手动切换
+      - DIRECT
+  - name: 油管视频
+    icon: https://cdn.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/YouTube.png
+    type: select
+    proxies:
+      - 自动选择
+      - 节点选择
+      - 狮城节点
+      - 香港节点
+      - 台湾节点
+      - 日本节点
+      - 美国节点
+      - 韩国节点
+      - 手动切换
+      - DIRECT
+  - name: 奈飞视频
+    icon: https://cdn.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Netflix.png
+    type: select
+    proxies:
+      - 奈飞节点
+      - 自动选择
+      - 节点选择
+      - 狮城节点
+      - 香港节点
+      - 台湾节点
+      - 日本节点
+      - 美国节点
+      - 韩国节点
+      - 手动切换
+      - DIRECT
+  - name: 巴哈姆特
+    icon: https://cdn.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Bahamut.png
+    type: select
+    proxies:
+      - 台湾节点
+      - 节点选择
+      - 手动切换
+      - DIRECT
+  - name: 哔哩哔哩
+    icon: https://cdn.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/bilibili.png
+    type: select
+    proxies:
+      - 全球直连
+      - 台湾节点
+      - 香港节点
+  - name: 国外媒体
+    icon: https://cdn.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/ForeignMedia.png
+    type: select
+    proxies:
+      - 自动选择
+      - 节点选择
+      - 香港节点
+      - 台湾节点
+      - 狮城节点
+      - 日本节点
+      - 美国节点
+      - 韩国节点
+      - 手动切换
+      - DIRECT
+  - name: 国内媒体
+    icon: https://cdn.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/DomesticMedia.png
+    type: select
+    proxies:
+      - DIRECT
+      - 香港节点
+      - 台湾节点
+      - 狮城节点
+      - 日本节点
+      - 手动切换
+  - name: 谷歌FCM
+    icon: https://cdn.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Google_Search.png
+    type: select
+    proxies:
+      - DIRECT
+      - 自动选择
+      - 节点选择
+      - 美国节点
+      - 香港节点
+      - 台湾节点
+      - 狮城节点
+      - 日本节点
+      - 韩国节点
+      - 手动切换
+  - name: 微软Bing
+    icon: https://cdn.jsdelivr.net/gh/shindgewongxj/WHATSINStash@master/icon/bing.png
+    type: select
+    proxies:
+      - DIRECT
+      - 自动选择
+      - 节点选择
+      - 美国节点
+      - 香港节点
+      - 台湾节点
+      - 狮城节点
+      - 日本节点
+      - 韩国节点
+      - 手动切换
+  - name: 微软云盘
+    icon: https://cdn.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/OneDrive.png
+    type: select
+    proxies:
+      - DIRECT
+      - 自动选择
+      - 节点选择
+      - 美国节点
+      - 香港节点
+      - 台湾节点
+      - 狮城节点
+      - 日本节点
+      - 韩国节点
+      - 手动切换
+  - name: 微软服务
+    icon: https://cdn.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Microsoft.png
+    type: select
+    proxies:
+      - 自动选择
+      - 节点选择
+      - DIRECT
+      - 美国节点
+      - 香港节点
+      - 台湾节点
+      - 狮城节点
+      - 日本节点
+      - 韩国节点
+      - 手动切换
+  - name: 苹果服务
+    icon: https://cdn.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Apple.png
+    type: select
+    proxies:
+      - DIRECT
+      - 自动选择
+      - 节点选择
+      - 美国节点
+      - 香港节点
+      - 台湾节点
+      - 狮城节点
+      - 日本节点
+      - 韩国节点
+      - 手动切换
+  - name: 游戏平台
+    icon: https://cdn.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Game.png
+    type: select
+    proxies:
+      - DIRECT
+      - 自动选择
+      - 节点选择
+      - 美国节点
+      - 香港节点
+      - 台湾节点
+      - 狮城节点
+      - 日本节点
+      - 韩国节点
+      - 手动切换
+  - name: 网易音乐
+    icon: https://cdn.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Netease_Music.png
+    type: select
+    include-all: true
+    filter: (?i)网易|音乐|NetEase|Music
+    proxies:
+      - DIRECT
+      - 自动选择
+      - 节点选择
+  - name: 全球直连
+    icon: https://cdn.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Direct.png
+    type: select
+    proxies:
+      - DIRECT
+      - 自动选择
+      - 节点选择
+  - name: 广告拦截
+    icon: https://cdn.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/AdBlack.png
+    type: select
+    proxies:
+      - REJECT
+      - DIRECT
+  - name: 应用净化
+    icon: https://cdn.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Hijacking.png
+    type: select
+    proxies:
+      - REJECT
+      - DIRECT
+  - name: 漏网之鱼
+    icon: https://cdn.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Final.png
+    type: select
+    proxies:
+      - 自动选择
+      - 节点选择
+      - DIRECT
+      - 香港节点
+      - 台湾节点
+      - 狮城节点
+      - 日本节点
+      - 美国节点
+      - 韩国节点
+      - 手动切换
+  - name: 香港节点
+    icon: https://cdn.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Hong_Kong.png
+    include-all: true
+    filter: (?i)港|HK|hk|Hong Kong|HongKong|hongkong
+    type: url-test
+    interval: 300
+    tolerance: 50
+  - name: 日本节点
+    icon: https://cdn.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Japan.png
+    include-all: true
+    filter: (?i)日本|川日|东京|大阪|泉日|埼玉|沪日|深日|JP|Japan
+    type: url-test
+    interval: 300
+    tolerance: 50
+  - name: 美国节点
+    icon: https://cdn.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/United_States.png
+    include-all: true
+    filter: (?i)美|波特兰|达拉斯|俄勒冈|凤凰城|费利蒙|硅谷|拉斯维加斯|洛杉矶|圣何塞|圣克拉拉|西雅图|芝加哥|US|United States
+    type: url-test
+    interval: 300
+    tolerance: 50
+  - name: 台湾节点
+    icon: https://cdn.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Taiwan.png
+    include-all: true
+    filter: (?i)台|新北|彰化|TW|Taiwan
+    type: url-test
+    interval: 300
+    tolerance: 50
+  - name: 狮城节点
+    icon: https://cdn.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Singapore.png
+    include-all: true
+    filter: (?i)新加坡|坡|狮城|SG|Singapore
+    type: url-test
+    interval: 300
+    tolerance: 50
+  - name: 韩国节点
+    icon: https://cdn.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Korea.png
+    include-all: true
+    filter: (?i)KR|Korea|KOR|首尔|韩|韓
+    type: url-test
+    interval: 300
+    tolerance: 50
+  - name: 奈飞节点
+    icon: https://cdn.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Netflix.png
+    include-all: true
+    filter: (?i)NF|奈飞|解锁|Netflix|NETFLIX|Media
+    type: select
+  - name: GLOBAL
+    icon: https://cdn.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Global.png
+    include-all: true
+    type: url-test
+    interval: 300
+    tolerance: 50
+    proxies:
+      - 节点选择
+      - 手动切换
+      - 自动选择
+      - 电报消息
+      - AI平台
+      - 油管视频
+      - 奈飞视频
+      - 巴哈姆特
+      - 哔哩哔哩
+      - 国外媒体
+      - 国内媒体
+      - 谷歌FCM
+      - 微软Bing
+      - 微软云盘
+      - 微软服务
+      - 苹果服务
+      - 游戏平台
+      - 网易音乐
+      - 全球直连
+      - 广告拦截
+      - 应用净化
+      - 漏网之鱼
+      - 香港节点
+      - 日本节点
+      - 美国节点
+      - 台湾节点
+      - 狮城节点
+      - 韩国节点
+      - 奈飞节点
 
 rule-providers:
-  Apple:
-    type: http
+  LocalAreaNetwork:
+    url: https://cdn.jsdelivr.net/gh/ACL4SSR/ACL4SSR@master/Clash/LocalAreaNetwork.list
+    path: ./ruleset/LocalAreaNetwork.list
     behavior: classical
-    format: yaml
-    url: https://cdn.jsdmirror.com/gh/perfect-panel/rules/rule/Clash/Apple/Apple_Classical_No_Resolve.yaml
     interval: 86400
-  Google:
+    format: text
     type: http
+  UnBan:
+    url: https://cdn.jsdelivr.net/gh/ACL4SSR/ACL4SSR@master/Clash/UnBan.list
+    path: ./ruleset/UnBan.list
     behavior: classical
-    format: yaml
-    url: https://cdn.jsdmirror.com/gh/perfect-panel/rules/rule/Clash/Google/Google_No_Resolve.yaml
     interval: 86400
+    format: text
+    type: http
+  UnBan1:
+    url: https://cdn.jsdelivr.net/gh/zsokami/ACL4SSR@main/UnBan1.list
+    path: ./ruleset/UnBan1.list
+    behavior: classical
+    interval: 86400
+    format: text
+    type: http
+  BanAD:
+    url: https://cdn.jsdelivr.net/gh/ACL4SSR/ACL4SSR@master/Clash/BanAD.list
+    path: ./ruleset/BanAD.list
+    behavior: classical
+    interval: 86400
+    format: text
+    type: http
+  AdBlock:
+    url: https://cdn.jsdelivr.net/gh/celin1286/ACL4SSR@main/Ruleset/AdBlock.list
+    path: ./ruleset/AdBlock.list
+    behavior: classical
+    interval: 86400
+    format: text
+    type: http
+  BanProgramAD:
+    url: https://cdn.jsdelivr.net/gh/ACL4SSR/ACL4SSR@master/Clash/BanProgramAD.list
+    path: ./ruleset/BanProgramAD.list
+    behavior: classical
+    interval: 86400
+    format: text
+    type: http
+  BanProgramAD1:
+    url: https://cdn.jsdelivr.net/gh/zsokami/ACL4SSR@main/BanProgramAD1.list
+    path: ./ruleset/BanProgramAD1.list
+    behavior: classical
+    interval: 86400
+    format: text
+    type: http
+  GoogleFCM:
+    url: https://cdn.jsdelivr.net/gh/ACL4SSR/ACL4SSR@master/Clash/Ruleset/GoogleFCM.list
+    path: ./ruleset/GoogleFCM.list
+    behavior: classical
+    interval: 86400
+    format: text
+    type: http
+  GoogleCN:
+    url: https://cdn.jsdelivr.net/gh/ACL4SSR/ACL4SSR@master/Clash/GoogleCN.list
+    path: ./ruleset/GoogleCN.list
+    behavior: classical
+    interval: 86400
+    format: text
+    type: http
+  SteamCN:
+    url: https://cdn.jsdelivr.net/gh/ACL4SSR/ACL4SSR@master/Clash/Ruleset/SteamCN.list
+    path: ./ruleset/SteamCN.list
+    behavior: classical
+    interval: 86400
+    format: text
+    type: http
+  Bing:
+    url: https://cdn.jsdelivr.net/gh/ACL4SSR/ACL4SSR@master/Clash/Bing.list
+    path: ./ruleset/Bing.list
+    behavior: classical
+    interval: 86400
+    format: text
+    type: http
+  OneDrive:
+    url: https://cdn.jsdelivr.net/gh/ACL4SSR/ACL4SSR@master/Clash/OneDrive.list
+    path: ./ruleset/OneDrive.list
+    behavior: classical
+    interval: 86400
+    format: text
+    type: http
   Microsoft:
-    type: http
+    url: https://cdn.jsdelivr.net/gh/ACL4SSR/ACL4SSR@master/Clash/Microsoft.list
+    path: ./ruleset/Microsoft.list
     behavior: classical
-    format: yaml
-    url: https://cdn.jsdmirror.com/gh/perfect-panel/rules/rule/Clash/Microsoft/Microsoft.yaml
     interval: 86400
-  Github:
+    format: text
     type: http
+  Apple:
+    url: https://cdn.jsdelivr.net/gh/ACL4SSR/ACL4SSR@master/Clash/Apple.list
+    path: ./ruleset/Apple.list
     behavior: classical
-    format: yaml
-    url: https://cdn.jsdmirror.com/gh/perfect-panel/rules/rule/Clash/GitHub/GitHub.yaml
     interval: 86400
-  HBO:
+    format: text
     type: http
-    behavior: classical
-    format: yaml
-    url: https://cdn.jsdmirror.com/gh/perfect-panel/rules/rule/Clash/HBO/HBO.yaml
-    interval: 86400
-  Disney:
-    type: http
-    behavior: classical
-    format: yaml
-    url: https://cdn.jsdmirror.com/gh/perfect-panel/rules/rule/Clash/Disney/Disney.yaml
-    interval: 86400
-  TikTok:
-    type: http
-    behavior: classical
-    format: yaml
-    url: https://cdn.jsdmirror.com/gh/perfect-panel/rules/rule/Clash/TikTok/TikTok.yaml
-    interval: 86400
-  Netflix:
-    type: http
-    behavior: classical
-    format: yaml
-    url: https://cdn.jsdmirror.com/gh/perfect-panel/rules/rule/Clash/Netflix/Netflix.yaml
-    interval: 86400
-  GlobalMedia:
-    type: http
-    behavior: classical
-    format: yaml
-    url: https://cdn.jsdmirror.com/gh/perfect-panel/rules/rule/Clash/GlobalMedia/GlobalMedia_Classical_No_Resolve.yaml
-    interval: 86400
   Telegram:
-    type: http
+    url: https://cdn.jsdelivr.net/gh/ACL4SSR/ACL4SSR@master/Clash/Telegram.list
+    path: ./ruleset/Telegram.list
     behavior: classical
-    format: yaml
-    url: https://cdn.jsdmirror.com/gh/perfect-panel/rules/rule/Clash/Telegram/Telegram_No_Resolve.yaml
     interval: 86400
-  OpenAI:
+    format: text
     type: http
+  OpenAi:
+    url: https://cdn.jsdelivr.net/gh/ACL4SSR/ACL4SSR@master/Clash/Ruleset/OpenAi.list
+    path: ./ruleset/OpenAi.list
     behavior: classical
-    format: yaml
-    url: https://cdn.jsdmirror.com/gh/perfect-panel/rules/rule/Clash/OpenAI/OpenAI.yaml
     interval: 86400
-  Gemini:
+    format: text
+    type: http 
+  AISuite:
+    url: https://cdn.jsdelivr.net/gh/celin1286/ACL4SSR@main/Ruleset/AISuite.list
+    path: ./ruleset/AISuite.list
+    behavior: classical
+    interval: 86400
+    format: text
+    type: http  
+  NetEaseMusic:
+    url: https://cdn.jsdelivr.net/gh/ACL4SSR/ACL4SSR@master/Clash/Ruleset/NetEaseMusic.list
+    path: ./ruleset/NetEaseMusic.list
+    behavior: classical
+    interval: 86400
+    format: text
     type: http
+  Epic:
+    url: https://cdn.jsdelivr.net/gh/ACL4SSR/ACL4SSR@master/Clash/Ruleset/Epic.list
+    path: ./ruleset/Epic.list
     behavior: classical
-    format: yaml
-    url: https://cdn.jsdmirror.com/gh/perfect-panel/rules/rule/Clash/Gemini/Gemini.yaml
     interval: 86400
-  Copilot:
+    format: text
     type: http
+  Origin:
+    url: https://cdn.jsdelivr.net/gh/ACL4SSR/ACL4SSR@master/Clash/Ruleset/Origin.list
+    path: ./ruleset/Origin.list
     behavior: classical
-    format: yaml
-    url: https://cdn.jsdmirror.com/gh/perfect-panel/rules/rule/Clash/Copilot/Copilot.yaml
     interval: 86400
-  Claude:
+    format: text
     type: http
+  Sony:
+    url: https://cdn.jsdelivr.net/gh/ACL4SSR/ACL4SSR@master/Clash/Ruleset/Sony.list
+    path: ./ruleset/Sony.list
     behavior: classical
-    format: yaml
-    url: https://cdn.jsdmirror.com/gh/perfect-panel/rules/rule/Clash/Claude/Claude.yaml
     interval: 86400
-  Crypto:
+    format: text
     type: http
+  Steam:
+    url: https://cdn.jsdelivr.net/gh/ACL4SSR/ACL4SSR@master/Clash/Ruleset/Steam.list
+    path: ./ruleset/Steam.list
     behavior: classical
-    format: yaml
-    url: https://cdn.jsdmirror.com/gh/perfect-panel/rules/rule/Clash/Crypto/Crypto.yaml
     interval: 86400
-  Cryptocurrency:
+    format: text
     type: http
+  Nintendo:
+    url: https://cdn.jsdelivr.net/gh/ACL4SSR/ACL4SSR@master/Clash/Ruleset/Nintendo.list
+    path: ./ruleset/Nintendo.list
     behavior: classical
-    format: yaml
-    url: https://cdn.jsdmirror.com/gh/perfect-panel/rules/rule/Clash/Cryptocurrency/Cryptocurrency.yaml
     interval: 86400
-  Game:
+    format: text
     type: http
+  YouTube:
+    url: https://cdn.jsdelivr.net/gh/ACL4SSR/ACL4SSR@master/Clash/Ruleset/YouTube.list
+    path: ./ruleset/YouTube.list
     behavior: classical
-    format: yaml
-    url: https://cdn.jsdmirror.com/gh/perfect-panel/rules/rule/Clash/Game/Game.yaml
     interval: 86400
-  Global:
+    format: text
     type: http
+  Netflix:
+    url: https://cdn.jsdelivr.net/gh/ACL4SSR/ACL4SSR@master/Clash/Ruleset/Netflix.list
+    path: ./ruleset/Netflix.list
     behavior: classical
-    format: yaml
-    url: https://cdn.jsdmirror.com/gh/perfect-panel/rules/rule/Clash/Global/Global_Classical_No_Resolve.yaml
     interval: 86400
-  ChinaMax:
+    format: text
     type: http
+  Bahamut:
+    url: https://cdn.jsdelivr.net/gh/ACL4SSR/ACL4SSR@master/Clash/Ruleset/Bahamut.list
+    path: ./ruleset/Bahamut.list
     behavior: classical
-    format: yaml
-    url: https://cdn.jsdmirror.com/gh/perfect-panel/rules/rule/Clash/ChinaMax/ChinaMax_Classical_No_Resolve.yaml
     interval: 86400
-  Lan:
+    format: text
     type: http
+  BilibiliHMT:
+    url: https://cdn.jsdelivr.net/gh/ACL4SSR/ACL4SSR@master/Clash/Ruleset/BilibiliHMT.list
+    path: ./ruleset/BilibiliHMT.list
     behavior: classical
-    format: yaml
-    url: https://cdn.jsdmirror.com/gh/perfect-panel/rules/rule/Clash/Lan/Lan.yaml
     interval: 86400
+    format: text
+    type: http
+  Bilibili:
+    url: https://cdn.jsdelivr.net/gh/ACL4SSR/ACL4SSR@master/Clash/Ruleset/Bilibili.list
+    path: ./ruleset/Bilibili.list
+    behavior: classical
+    interval: 86400
+    format: text
+    type: http
+  ChinaMedia:
+    url: https://cdn.jsdelivr.net/gh/ACL4SSR/ACL4SSR@master/Clash/Ruleset/ChinaMedia.list
+    path: ./ruleset/ChinaMedia.list
+    behavior: classical
+    interval: 86400
+    format: text
+    type: http
+  DirectWogg:
+    url: https://down.nigx.cn/raw.githubusercontent.com/celin1286/ACL4SSR/refs/heads/main/Wogg/DirectWogg.list
+    path: ./ruleset/DirectWogg.list
+    behavior: classical
+    interval: 86400
+    format: text
+    type: http
+  ProxyMedia:
+    url: https://cdn.jsdelivr.net/gh/ACL4SSR/ACL4SSR@master/Clash/ProxyMedia.list
+    path: ./ruleset/ProxyMedia.list
+    behavior: classical
+    interval: 86400
+    format: text
+    type: http
+  ProxyWogg:
+    url: https://down.nigx.cn/raw.githubusercontent.com/celin1286/ACL4SSR/refs/heads/main/Wogg/ProxyWogg.list
+    path: ./ruleset/ProxyWogg.list
+    behavior: classical
+    interval: 86400
+    format: text
+    type: http
+  ProxyGFWlist:
+    url: https://cdn.jsdelivr.net/gh/ACL4SSR/ACL4SSR@master/Clash/ProxyGFWlist.list
+    path: ./ruleset/ProxyGFWlist.list
+    behavior: classical
+    interval: 86400
+    format: text
+    type: http
+  ChinaDomain:
+    url: https://cdn.jsdelivr.net/gh/ACL4SSR/ACL4SSR@master/Clash/ChinaDomain.list
+    path: ./ruleset/ChinaDomain.list
+    behavior: domain
+    interval: 86400
+    format: text
+    type: http
+  ChinaOnly:
+    url: https://cdn.jsdelivr.net/gh/zsokami/ACL4SSR@main/ChinaOnly.list
+    path: ./ruleset/ChinaOnly.list
+    behavior: classical
+    interval: 86400
+    format: text
+    type: http
+  ChinaCompanyIp:
+    url: https://cdn.jsdelivr.net/gh/ACL4SSR/ACL4SSR@master/Clash/ChinaCompanyIp.list
+    path: ./ruleset/ChinaCompanyIp.list
+    behavior: ipcidr
+    interval: 86400
+    format: text
+    type: http
+  Download:
+    url: https://cdn.jsdelivr.net/gh/ACL4SSR/ACL4SSR@master/Clash/Download.list
+    path: ./ruleset/Download.list
+    behavior: classical
+    interval: 86400
+    format: text
+    type: http
+
+rules:
+  - "RULE-SET,LocalAreaNetwork,全球直连"
+  - "RULE-SET,UnBan,全球直连"
+  - "RULE-SET,UnBan1,全球直连"
+  - "RULE-SET,BanAD,广告拦截"
+  - "RULE-SET,AdBlock,广告拦截"
+  - "RULE-SET,BanProgramAD,应用净化"
+  - "RULE-SET,BanProgramAD1,应用净化"
+  - "RULE-SET,GoogleFCM,谷歌FCM"
+  - "RULE-SET,GoogleCN,全球直连"
+  - "RULE-SET,SteamCN,全球直连"
+  - "RULE-SET,Bing,微软Bing"
+  - "RULE-SET,OneDrive,微软云盘"
+  - "RULE-SET,Microsoft,微软服务"
+  - "RULE-SET,Apple,苹果服务"
+  - "RULE-SET,Telegram,电报消息"
+  - "RULE-SET,OpenAi,AI平台"
+  - "RULE-SET,AISuite,AI平台"
+  - "RULE-SET,NetEaseMusic,网易音乐"
+  - "RULE-SET,Epic,游戏平台"
+  - "RULE-SET,Origin,游戏平台"
+  - "RULE-SET,Sony,游戏平台"
+  - "RULE-SET,Steam,游戏平台"
+  - "RULE-SET,Nintendo,游戏平台"
+  - "RULE-SET,YouTube,油管视频"
+  - "RULE-SET,Netflix,奈飞视频"
+  - "RULE-SET,Bahamut,巴哈姆特"
+  - "RULE-SET,BilibiliHMT,哔哩哔哩"
+  - "RULE-SET,Bilibili,哔哩哔哩"
+  - "RULE-SET,ChinaMedia,国内媒体"
+  - "RULE-SET,DirectWogg,国内媒体"
+  - "RULE-SET,ProxyMedia,国外媒体"
+  - "RULE-SET,ProxyWogg,国外媒体"
+  - "RULE-SET,ProxyGFWlist,节点选择"
+  - "RULE-SET,ChinaDomain,全球直连"
+  - "RULE-SET,ChinaOnly,全球直连"
+  - "RULE-SET,ChinaCompanyIp,全球直连"
+  - "RULE-SET,Download,全球直连"
+  - "GEOIP,CN,全球直连"
+  - "MATCH,漏网之鱼"
 
 url-rewrite:
   - ^https?:\/\/(www.)?g\.cn https://www.google.com 302
