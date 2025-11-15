@@ -249,9 +249,9 @@ proxies:
   {{- $allProxyNames = append $allProxyNames $proxy.Name -}}
 {{- end -}}
 {{- $regionConfigs := list
+  (dict "name" "ALL·香港地区" "icon" "https://cdn.jsdelivr.net/gh/GitMetaio/Surfing@rm/Home/icon/HK.svg" "pattern" "^(?=.*(港|HK|hk|Hong Kong|HongKong|hongkong)).*$")
   (dict "name" "ALL·日本地区" "icon" "https://cdn.jsdelivr.net/gh/GitMetaio/Surfing@rm/Home/icon/JP.svg" "pattern" "^(?=.*(日本|川日|东京|大阪|泉日|埼玉|沪日|深日|[^-]日|JP|Japan)).*$")
   (dict "name" "ALL·中国台湾" "icon" "https://cdn.jsdelivr.net/gh/GitMetaio/Surfing@rm/Home/icon/CN.svg" "pattern" "^(?=.*(台|新北|彰化|TW|Taiwan|taipei)).*$")
-  (dict "name" "ALL·香港地区" "icon" "https://cdn.jsdelivr.net/gh/GitMetaio/Surfing@rm/Home/icon/HK.svg" "pattern" "^(?=.*(港|HK|hk|Hong Kong|HongKong|hongkong)).*$")
   (dict "name" "ALL·美国地区" "icon" "https://cdn.jsdelivr.net/gh/GitMetaio/Surfing@rm/Home/icon/US.svg" "pattern" "^(?=.*(美|波特兰|达拉斯|俄勒冈|凤凰城|费利蒙|硅谷|拉斯维加斯|洛杉矶|圣何塞|圣克拉拉|西雅图|芝加哥|US|United States)).*$")
   (dict "name" "ALL·狮城地区" "icon" "https://cdn.jsdelivr.net/gh/GitMetaio/Surfing@rm/Home/icon/Singapore.svg" "pattern" "^(?=.*(新加坡|坡|狮城|SG|Singapore)).*$")
   (dict "name" "ALL·其它地区" "icon" "https://cdn.jsdelivr.net/gh/GitMetaio/Surfing@rm/Home/icon/Globe.svg" "pattern" "^(?!.*(港|HK|hk|Hong Kong|HongKong|hongkong|日本|川日|东京|大阪|泉日|埼玉|沪日|深日|[^-]日|JP|Japan|美|波特兰|达拉斯|俄勒冈|凤凰城|费利蒙|硅谷|拉斯维加斯|洛杉矶|圣何塞|圣克拉拉|西雅图|芝加哥|US|United States|台|新北|彰化|TW|Taiwan|新加坡|坡|狮城|SG|Singapore|灾|网易|Netease|套餐|重置|剩余|到期|订阅|群|账户|流量|有效期|时间|官网|拒绝|DNS|Ch|网址|售|防失)).*$")
@@ -274,10 +274,10 @@ proxy_groups: &proxy_groups
       - ALL·延迟最低
       - ALL·负载均衡
       - ALL·故障转移
-      - ALL·中国台湾
       - ALL·香港地区
-      - ALL·美国地区
       - ALL·日本地区
+      - ALL·中国台湾
+      - ALL·美国地区
       - ALL·狮城地区
       - ALL·其它地区
       - ⛔️ 禁止·拒绝连接
@@ -292,9 +292,9 @@ proxy-groups:
       - ALL·延迟最低
       - ALL·负载均衡
       - ALL·故障转移
+      - ALL·香港地区
       - ALL·日本地区
       - ALL·中国台湾
-      - ALL·香港地区
       - ALL·美国地区
       - ALL·狮城地区
       - ALL·其它地区
@@ -307,6 +307,18 @@ proxy-groups:
       - 🌐 本机·本地直连
       - 总模式
 
+{{- range $cfg := $regionConfigs }}
+  - name: {{ $cfg.name }}
+    icon: "{{ $cfg.icon }}"
+    filter: "{{ $cfg.pattern }}"
+    <<: *All
+    proxies:
+{{- $matches := index $regionProxyMap $cfg.name }}
+{{- range $matches }}
+      - {{ . | quote }}
+{{- end }}
+
+{{- end }}
   - name: 小红书
     icon: "https://cdn.jsdelivr.net/gh/GitMetaio/Surfing@rm/Home/icon/XiaoHongShu.svg"
     <<: *proxy_groups
@@ -443,21 +455,6 @@ proxy-groups:
 {{- end }}
 {{- else }}
       - 🌐 本机·本地直连
-{{- end }}
-{{- range $cfg := $regionConfigs }}
-  - name: {{ $cfg.name }}
-    icon: "{{ $cfg.icon }}"
-    filter: "{{ $cfg.pattern }}"
-    <<: *All
-    proxies:
-{{- $matches := index $regionProxyMap $cfg.name }}
-{{- if gt (len $matches) 0 }}
-{{- range $matches }}
-      - {{ . | quote }}
-{{- end }}
-{{- else }}
-      - 🌐 本机·本地直连
-{{- end }}
 {{- end }}
 
   - name: 特殊地址
