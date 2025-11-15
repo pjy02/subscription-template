@@ -265,7 +265,7 @@ proxies:
     {{- end -}}
   {{- end -}}
   {{- $_ := set $regionProxyMap $cfg.name $matches -}}
-{{- end -}}
+{{- end }}
 
 proxy_groups: &proxy_groups
     type: select
