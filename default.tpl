@@ -319,3 +319,41 @@ http{{- if eq $proxy.Type "https" -}}s{{- end -}}://{{- if or (ne (default "" $u
 socks5://{{- if or (ne (default "" $user) "") (ne (default "" $password) "") -}}{{ $user }}:{{ $password }}@{{- end -}}{{ $server }}:{{ $proxy.Port }}{{- if eq $proxy.Type "socks5-tls" }}?tls=1{{- end }}#{{ $proxy.Name }}
   {{- end }}
 {{- end }}
+
+{{- /* 区域分组（与 clash.tpl 保持一致的匹配顺序） */ -}}
+{{- $regionConfigs := list
+  (dict "name" "ALL·香港地区" "pattern" "^(?=.*(港|HK|hk|Hong Kong|HongKong|hongkong)).*$")
+  (dict "name" "ALL·日本地区" "pattern" "^(?=.*(日本|川日|东京|大阪|泉日|埼玉|沪日|深日|[^-]日|JP|Japan)).*$")
+  (dict "name" "ALL·中国台湾" "pattern" "^(?=.*(台|新北|彰化|TW|Taiwan|taipei)).*$")
+  (dict "name" "ALL·美国地区" "pattern" "^(?=.*(美|波特兰|达拉斯|俄勒冈|凤凰城|费利蒙|硅谷|拉斯维加斯|洛杉矶|圣何塞|圣克拉拉|西雅图|芝加哥|US|United States)).*$")
+  (dict "name" "ALL·狮城地区" "pattern" "^(?=.*(新加坡|坡|狮城|SG|Singapore)).*$")
+  (dict "name" "ALL·其它地区" "pattern" "^(?!.*(港|HK|hk|Hong Kong|HongKong|hongkong|日本|川日|东京|大阪|泉日|埼玉|沪日|深日|[^-]日|JP|Japan|美|波特兰|达拉斯|勒冈|凤凰城|费利蒙|硅谷|拉斯维加斯|洛杉矶|圣何塞|圣克拉拉|西雅图|芝加哥|US|United States|台|新北|彰化|TW|Taiwan|新加坡|坡|狮城|SG|Singapore|灾|网易|Netease|套餐|重置|剩余|到期|订阅|群|账户|流量|有效期|时间|官网|拒绝|DNS|Ch|网址|售|防失)).*$")
+-}}
+{{- $regionProxyMap := dict -}}
+{{- $hasRegionMatches := false -}}
+{{- range $cfg := $regionConfigs -}}
+  {{- $matches := list -}}
+  {{- range $proxy := $supportedProxies -}}
+    {{- if regexMatch $cfg.pattern $proxy.Name -}}
+      {{- $matches = append $matches $proxy.Name -}}
+    {{- end -}}
+  {{- end -}}
+  {{- if gt (len $matches) 0 -}}
+    {{- $hasRegionMatches = true -}}
+  {{- end -}}
+  {{- $_ := set $regionProxyMap $cfg.name $matches -}}
+{{- end -}}
+
+{{- if $hasRegionMatches }}
+# ==== Region Proxy Groups ====
+{{- range $cfg := $regionConfigs }}
+  {{- $matches := index $regionProxyMap $cfg.name -}}
+  {{- if gt (len $matches) 0 }}
+# {{ $cfg.name }}
+{{- range $matches }}
+# - {{ . }}
+{{- end }}
+#
+  {{- end -}}
+{{- end }}
+{{- end }}
