@@ -468,186 +468,283 @@ proxy-groups:
 
 # —————————
 
-rule-anchor:
-  Local: &Local
-    {type: file, behavior: classical, format: text}
-  Classical: &Classical
-    {type: http, behavior: classical, format: text, interval: 86400}
-  IPCIDR: &IPCIDR
-    {type: http, behavior: ipcidr, format: mrs, interval: 86400}
-  Domain: &Domain
-    {type: http, behavior: domain, format: mrs, interval: 86400}
-# —————————
-
 # 部分规则上游为https://github.com/blackmatrix7/ios_rule_script
 # Github Actions 每日自动同步跟随更新
 rule-providers:
   自定义规则: # 主要用于广告误杀自定义放行
-    <<: *Local
+    type: file
+    behavior: classical
+    format: text
     path: ./etc/自定义规则.list # 请按路径新建文件及建立你需要的规则
 
   WebRTC_端/域:
-    <<: *Classical
+    type: http
+    behavior: classical
+    format: text
+    interval: 86400
     path: ./rules/WebRTC.list
     url: "https://cdn.jsdelivr.net/gh/GitMetaio/Surfing@rm/Home/rules/WebRTC.list"
 
   CN_IP:
-    <<: *IPCIDR
+    type: http
+    behavior: ipcidr
+    format: mrs
+    interval: 86400
     path: ./rules/CN_IP.mrs
     url: "https://cdn.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geoip/cn.mrs"
   CN_域:
-    <<: *Domain
+    type: http
+    behavior: domain
+    format: mrs
+    interval: 86400
     path: ./rules/CN_域.mrs
     url: "https://cdn.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/cn.mrs"
 
   No-ads-all_域:
-    <<: *Domain
+    type: http
+    behavior: domain
+    format: mrs
+    interval: 86400
     path: ./rules/No-ads-all.mrs
     url: "https://anti-ad.net/mihomo.mrs"
 
   XiaoHongShu_域:
-    <<: *Domain
+    type: http
+    behavior: domain
+    format: mrs
+    interval: 86400
     path: ./rules/XiaoHongShu.mrs
     url: "https://cdn.jsdelivr.net/gh/GitMetaio/rule@master/rule/Clash/XiaoHongShu/XiaoHongShu_OCD_Domain.mrs"
 
   DouYin_域:
-    <<: *Domain
+    type: http
+    behavior: domain
+    format: mrs
+    interval: 86400
     path: ./rules/DouYin.mrs
     url: "https://cdn.jsdelivr.net/gh/GitMetaio/rule@master/rule/Clash/DouYin/DouYin_OCD_Domain.mrs"
 
   BiliBili_域:
-    <<: *Domain
+    type: http
+    behavior: domain
+    format: mrs
+    interval: 86400
     path: ./rules/BiliBili.mrs
     url: "https://cdn.jsdelivr.net/gh/GitMetaio/rule@master/rule/Clash/BiliBili/BiliBili_OCD_Domain.mrs"
   BiliBili_IP:
-    <<: *IPCIDR
+    type: http
+    behavior: ipcidr
+    format: mrs
+    interval: 86400
     path: ./rules/BiliBili_IP.mrs
     url: "https://cdn.jsdelivr.net/gh/GitMetaio/rule@master/rule/Clash/BiliBili/BiliBili_OCD_IP.mrs"
 
   Steam_域:
-    <<: *Domain
+    type: http
+    behavior: domain
+    format: mrs
+    interval: 86400
     path: ./rules/Steam.mrs
     url: "https://cdn.jsdelivr.net/gh/GitMetaio/rule@master/rule/Clash/Steam/Steam_OCD_Domain.mrs"
 
   TikTok_域:
-    <<: *Domain
+    type: http
+    behavior: domain
+    format: mrs
+    interval: 86400
     path: ./rules/TikTok.mrs
     url: "https://cdn.jsdelivr.net/gh/GitMetaio/rule@master/rule/Clash/TikTok/TikTok_OCD_Domain.mrs"
 
   Spotify_域:
-    <<: *Domain
+    type: http
+    behavior: domain
+    format: mrs
+    interval: 86400
     path: ./rules/Spotify.mrs
     url: "https://cdn.jsdelivr.net/gh/GitMetaio/rule@master/rule/Clash/Spotify/Spotify_OCD_Domain.mrs"
   Spotify_IP:
-    <<: *IPCIDR
+    type: http
+    behavior: ipcidr
+    format: mrs
+    interval: 86400
     path: ./rules/Spotify_IP.mrs
     url: "https://cdn.jsdelivr.net/gh/GitMetaio/rule@master/rule/Clash/Spotify/Spotify_OCD_IP.mrs"
 
   Facebook_域:
-    <<: *Domain
+    type: http
+    behavior: domain
+    format: mrs
+    interval: 86400
     path: ./rules/Facebook.mrs
     url: "https://cdn.jsdelivr.net/gh/GitMetaio/rule@master/rule/Clash/Facebook/Facebook_OCD_Domain.mrs"
   Facebook_IP:
-    <<: *IPCIDR
+    type: http
+    behavior: ipcidr
+    format: mrs
+    interval: 86400
     path: ./rules/Facebook_IP.mrs
     url: "https://cdn.jsdelivr.net/gh/GitMetaio/rule@master/rule/Clash/Facebook/Facebook_OCD_IP.mrs"
 
   Telegram_域:
-    <<: *Domain
+    type: http
+    behavior: domain
+    format: mrs
+    interval: 86400
     path: ./rules/Telegram.mrs
     url: "https://cdn.jsdelivr.net/gh/GitMetaio/rule@master/rule/Clash/Telegram/Telegram_OCD_Domain.mrs"
   Telegram_IP:
-    <<: *IPCIDR
+    type: http
+    behavior: ipcidr
+    format: mrs
+    interval: 86400
     path: ./rules/Telegram_IP.mrs
     url: "https://cdn.jsdelivr.net/gh/GitMetaio/rule@master/rule/Clash/Telegram/Telegram_OCD_IP.mrs"
 
   YouTube_域:
-    <<: *Domain
+    type: http
+    behavior: domain
+    format: mrs
+    interval: 86400
     path: ./rules/YouTube.mrs
     url: "https://cdn.jsdelivr.net/gh/GitMetaio/rule@master/rule/Clash/YouTube/YouTube_OCD_Domain.mrs"
   YouTube_IP:
-    <<: *IPCIDR
+    type: http
+    behavior: ipcidr
+    format: mrs
+    interval: 86400
     path: ./rules/YouTube_IP.mrs
     url: "https://cdn.jsdelivr.net/gh/GitMetaio/rule@master/rule/Clash/YouTube/YouTube_OCD_IP.mrs"
 
   Google_域:
-    <<: *Domain
+    type: http
+    behavior: domain
+    format: mrs
+    interval: 86400
     path: ./rules/Google.mrs
     url: "https://cdn.jsdelivr.net/gh/GitMetaio/rule@master/rule/Clash/Google/Google_OCD_Domain.mrs"
   Google_IP:
-    <<: *IPCIDR
+    type: http
+    behavior: ipcidr
+    format: mrs
+    interval: 86400
     path: ./rules/Google_IP.mrs
     url: "https://cdn.jsdelivr.net/gh/GitMetaio/rule@master/rule/Clash/Google/Google_OCD_IP.mrs"
 
   GoogleFCM_域:
-    <<: *Domain
+    type: http
+    behavior: domain
+    format: mrs
+    interval: 86400
     path: ./rules/GoogleFCM.mrs
     url: "https://cdn.jsdelivr.net/gh/GitMetaio/rule@master/rule/Clash/GoogleFCM/GoogleFCM_OCD_Domain.mrs"
   GoogleFCM_IP:
-    <<: *IPCIDR
+    type: http
+    behavior: ipcidr
+    format: mrs
+    interval: 86400
     path: ./rules/GoogleFCM_IP.mrs
     url: "https://cdn.jsdelivr.net/gh/GitMetaio/rule@master/rule/Clash/GoogleFCM/GoogleFCM_OCD_IP.mrs"
 
   Microsoft_域:
-    <<: *Domain
+    type: http
+    behavior: domain
+    format: mrs
+    interval: 86400
     path: ./rules/Microsoft.mrs
     url: "https://cdn.jsdelivr.net/gh/GitMetaio/rule@master/rule/Clash/Microsoft/Microsoft_OCD_Domain.mrs"
 
   Apple_域:
-    <<: *Domain
+    type: http
+    behavior: domain
+    format: mrs
+    interval: 86400
     path: ./rules/Apple.mrs
     url: "https://cdn.jsdelivr.net/gh/GitMetaio/rule@master/rule/Clash/Apple/Apple_OCD_Domain.mrs"
   Apple_IP:
-    <<: *IPCIDR
+    type: http
+    behavior: ipcidr
+    format: mrs
+    interval: 86400
     path: ./rules/Apple_IP.mrs
     url: "https://cdn.jsdelivr.net/gh/GitMetaio/rule@master/rule/Clash/Apple/Apple_OCD_IP.mrs"
 
   OpenAI_域:
-    <<: *Domain
+    type: http
+    behavior: domain
+    format: mrs
+    interval: 86400
     path: ./rules/OpenAI.mrs
     url: "https://cdn.jsdelivr.net/gh/GitMetaio/rule@master/rule/Clash/OpenAI/OpenAI_OCD_Domain.mrs"
   OpenAI_IP:
-    <<: *IPCIDR
+    type: http
+    behavior: ipcidr
+    format: mrs
+    interval: 86400
     path: ./rules/OpenAI_IP.mrs
     url: "https://cdn.jsdelivr.net/gh/GitMetaio/rule@master/rule/Clash/OpenAI/OpenAI_OCD_IP.mrs"
 
   Netflix_域:
-    <<: *Domain
+    type: http
+    behavior: domain
+    format: mrs
+    interval: 86400
     path: ./rules/Netflix.mrs
     url: "https://cdn.jsdelivr.net/gh/GitMetaio/rule@master/rule/Clash/Netflix/Netflix_OCD_Domain.mrs"
   Netflix_IP:
-    <<: *IPCIDR
+    type: http
+    behavior: ipcidr
+    format: mrs
+    interval: 86400
     path: ./rules/Netflix_IP.mrs
     url: "https://cdn.jsdelivr.net/gh/GitMetaio/rule@master/rule/Clash/Netflix/Netflix_OCD_IP.mrs"
 
   Discord_域:
-    <<: *Domain
+    type: http
+    behavior: domain
+    format: mrs
+    interval: 86400
     path: ./rules/Discord.mrs
     url: "https://cdn.jsdelivr.net/gh/GitMetaio/rule@master/rule/Clash/Discord/Discord_OCD_Domain.mrs"
 
   GitHub_域:
-    <<: *Domain
+    type: http
+    behavior: domain
+    format: mrs
+    interval: 86400
     path: ./rules/GitHub.mrs
     url: "https://cdn.jsdelivr.net/gh/GitMetaio/rule@master/rule/Clash/GitHub/GitHub_OCD_Domain.mrs"
 
   Twitter_域:
-    <<: *Domain
+    type: http
+    behavior: domain
+    format: mrs
+    interval: 86400
     path: ./rules/Twitter.mrs
     url: "https://cdn.jsdelivr.net/gh/GitMetaio/rule@master/rule/Clash/Twitter/Twitter_OCD_Domain.mrs"
   Twitter_IP:
-    <<: *IPCIDR
+    type: http
+    behavior: ipcidr
+    format: mrs
+    interval: 86400
     path: ./rules/Twitter_IP.mrs
     url: "https://cdn.jsdelivr.net/gh/GitMetaio/rule@master/rule/Clash/Twitter/Twitter_OCD_IP.mrs"
 
   Private_域:
-    <<: *Domain
+    type: http
+    behavior: domain
+    format: mrs
+    interval: 86400
     path: ./rules/LAN.mrs
     url: "https://cdn.jsdelivr.net/gh/GitMetaio/rule@master/rule/Clash/Lan/Lan_OCD_Domain.mrs"
   Private_IP:
-    <<: *IPCIDR
+    type: http
+    behavior: ipcidr
+    format: mrs
+    interval: 86400
     path: ./rules/Private_IP.mrs
     url: "https://cdn.jsdelivr.net/gh/GitMetaio/rule@master/rule/Clash/Lan/Lan_OCD_IP.mrs"
 # —————————
+
 
 rules:
   - DST-PORT,53,🌐 DNS_Hijack
