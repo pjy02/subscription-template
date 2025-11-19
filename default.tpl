@@ -41,6 +41,12 @@
     {{- $supportedProxies = append $supportedProxies $proxy -}}
   {{- end -}}
 {{- end -}}
+{{- $builtinProxies := list
+  (dict "Name" "🌐 本机·本地直连" "Type" "direct")
+  (dict "Name" "⛔️ 禁止·拒绝连接" "Type" "reject")
+  (dict "Name" "🌐 DNS_Hijack" "Type" "dns")
+-}}
+{{- $renderProxies := concat $supportedProxies $builtinProxies -}}
 
 # {{ .SiteName }}-{{ .SubscribeName }}
 # Traffic: {{ $used }} GiB/{{ $total }} GiB | Expires: {{ $ExpiredAt }}
@@ -197,10 +203,13 @@ All: &All
   include-all: true
 
 proxies:
-{{- range $proxy := $supportedProxies }}
+{{- range $proxy := $renderProxies }}
+  {{- if or (eq $proxy.Type "direct") (eq $proxy.Type "reject") (eq $proxy.Type "dns") }}
+  - { name: {{ $proxy.Name | quote }}, type: {{ $proxy.Type }}{{- if eq $proxy.Type "direct" }}, udp: true{{- end }} }
+  {{- else -}}
   {{- $common := "udp: true" -}}
 
-  {{- $server := $proxy.Server -}}
+  {{- $server := $proxy.Server -}} 
   {{- if and (contains $server ":") (not (hasPrefix "[" $server)) -}}
     {{- $server = printf "[%s]" $server -}}
   {{- end -}}
@@ -239,11 +248,8 @@ proxies:
   {{- else }}
   - { name: {{ $proxy.Name | quote }}, type: {{ $proxy.Type }}, server: {{ $server }}, port: {{ $proxy.Port }}, {{ $common }} }
   {{- end }}
+  {{- end }}
 {{- end }}
-
-  - {name: 🌐 本机·本地直连, type: direct, udp: true}
-  - {name: ⛔️ 禁止·拒绝连接, type: reject}
-  - {name: 🌐 DNS_Hijack, type: dns}
 
 {{- $allProxyNames := list -}}
 {{- range $proxy := $supportedProxies -}}
