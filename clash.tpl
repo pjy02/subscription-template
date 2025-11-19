@@ -244,6 +244,10 @@ proxies:
   {{- end }}
 {{- end }}
 
+  - {name: 🌐 本机·本地直连, type: direct, udp: true}
+  - {name: ⛔️ 禁止·拒绝连接, type: reject}
+  - {name: 🌐 DNS_Hijack, type: dns}
+
 {{- $allProxyNames := list -}}
 {{- range $proxy := $supportedProxies -}}
   {{- $allProxyNames = append $allProxyNames $proxy.Name -}}

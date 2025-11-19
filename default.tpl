@@ -197,9 +197,6 @@ All: &All
   include-all: true
 
 proxies:
-  - {name: 🌐 本机·本地直连, type: direct, udp: true}
-  - {name: ⛔️ 禁止·拒绝连接, type: reject}
-  - {name: 🌐 DNS_Hijack, type: dns}
 {{- range $proxy := $supportedProxies }}
   {{- $common := "udp: true" -}}
 
@@ -243,6 +240,10 @@ proxies:
   - { name: {{ $proxy.Name | quote }}, type: {{ $proxy.Type }}, server: {{ $server }}, port: {{ $proxy.Port }}, {{ $common }} }
   {{- end }}
 {{- end }}
+
+  - {name: 🌐 本机·本地直连, type: direct, udp: true}
+  - {name: ⛔️ 禁止·拒绝连接, type: reject}
+  - {name: 🌐 DNS_Hijack, type: dns}
 
 {{- $allProxyNames := list -}}
 {{- range $proxy := $supportedProxies -}}
