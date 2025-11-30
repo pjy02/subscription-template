@@ -97,7 +97,7 @@ p: &p
   interval: 86400
   health-check:
     enable: true
-    url: https://www.gstatic.com/generate_204
+    url: https://test.888231.xyz
     interval: 300
   proxy: 订阅更新
   header: # 如遇订阅加载不出来请切换ua
@@ -196,7 +196,7 @@ dns:
 # —————————
 
 A: &A
-  url: https://www.gstatic.com/generate_204
+  url: https://test.888231.xyz
   interval: 300
   tolerance: 50
   lazy: true
