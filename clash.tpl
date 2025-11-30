@@ -97,7 +97,7 @@ p: &p
   interval: 86400
   health-check:
     enable: true
-    url: https://www.gstatic.com/generate_204
+    url: https://www.apple.com/library/test/success.html
     interval: 300
   proxy: 订阅更新
   header: # 如遇订阅加载不出来请切换ua
@@ -196,7 +196,7 @@ dns:
 # —————————
 
 A: &A
-  url: https://www.gstatic.com/generate_204
+  url: https://www.apple.com/library/test/success.html
   interval: 300
   tolerance: 50
   lazy: true
@@ -207,10 +207,10 @@ All: &All
 proxies:
 {{- range $proxy := $renderProxies }}
   {{- if or (eq $proxy.Type "direct") (eq $proxy.Type "reject") (eq $proxy.Type "dns") }}
-  - { name: {{ $proxy.Name | quote }}, type: {{ $proxy.Type }}{{- if eq $proxy.Type "direct" }}, udp: true{{- end }} }
+- name: {{ $proxy.Name | quote }}
+  type: {{ $proxy.Type }}
+  udp: true
   {{- else -}}
-  {{- $common := "udp: true" -}}
-
   {{- $server := $proxy.Server -}}
   {{- if and (contains $server ":") (not (hasPrefix "[" $server)) -}}
     {{- $server = printf "[%s]" $server -}}
@@ -231,28 +231,306 @@ proxies:
 
   {{- $SkipVerify := $proxy.AllowInsecure -}}
 
-  {{- if eq $proxy.Type "shadowsocks" }}
-  - { name: {{ $proxy.Name | quote }}, type: ss, server: {{ $server }}, port: {{ $proxy.Port }}, cipher: {{ default "aes-128-gcm" $proxy.Method }}, password: {{ $password }}, {{ $common }}{{- if ne (default "" $proxy.Obfs) "" }}, plugin: obfs, plugin-opts: { mode: {{ $proxy.Obfs }}, host: {{ default "" $proxy.ObfsHost }} }{{- end }} }
-  {{- else if eq $proxy.Type "vmess" }}
-  - { name: {{ $proxy.Name | quote }}, type: vmess, server: {{ $server }}, port: {{ $proxy.Port }}, uuid: {{ $password }}, alterId: 0, cipher: auto, {{ $common }}{{- if or (eq $proxy.Transport "websocket") (eq $proxy.Transport "ws") }}, network: ws, ws-opts: { path: {{ default "/" $proxy.Path }}{{- if ne (default "" $proxy.Host) "" }}, headers: { Host: {{ $proxy.Host }} }{{- end }} }{{- else if eq $proxy.Transport "http" }}, network: http, http-opts: { method: GET, path: [{{ default "/" $proxy.Path | quote }}]{{- if ne (default "" $proxy.Host) "" }}, headers: { Host: [{{ $proxy.Host | quote }}] }{{- end }} }{{- else if eq $proxy.Transport "grpc" }}, network: grpc, grpc-opts: { grpc-service-name: {{ default "grpc" $proxy.ServiceName }} }{{- end }}{{- if or (eq $proxy.Security "tls") (eq $proxy.Security "reality") }}, tls: true{{- end }}{{- if ne (default "" $proxy.SNI) "" }}, servername: {{ $proxy.SNI }}{{- end }}{{- if $SkipVerify }}, skip-cert-verify: true{{- end }}{{- if ne (default "" $proxy.Fingerprint) "" }}, fingerprint: {{ $proxy.Fingerprint }}{{- end }} }
-  {{- else if eq $proxy.Type "vless" }}
-  - { name: {{ $proxy.Name | quote }}, type: vless, server: {{ $server }}, port: {{ $proxy.Port }}, uuid: {{ $password }}, {{ $common }}{{- if or (eq $proxy.Transport "ws") (eq $proxy.Transport "websocket") }}, network: ws, ws-opts: { path: {{ default "/" $proxy.Path }}{{- if ne (default "" $proxy.Host) "" }}, headers: { Host: {{ $proxy.Host }} }{{- end }} }{{- else if eq $proxy.Transport "http" }}, network: http, http-opts: { method: GET, path: [{{ default "/" $proxy.Path | quote }}]{{- if ne (default "" $proxy.Host) "" }}, headers: { Host: [{{ $proxy.Host | quote }}] }{{- end }} }{{- else if eq $proxy.Transport "httpupgrade" }}, network: httpupgrade, httpupgrade-opts: { path: {{ default "/" $proxy.Path }}{{- if ne (default "" $proxy.Host) "" }}, headers: { Host: {{ $proxy.Host }} }{{- end }} }{{- else if eq $proxy.Transport "grpc" }}, network: grpc, grpc-opts: { grpc-service-name: {{ default "grpc" $proxy.ServiceName }} }{{- end }}{{- if ne (default "" $proxy.SNI) "" }}, servername: {{ $proxy.SNI }}{{- end }}{{- if $SkipVerify }}, skip-cert-verify: true{{- end }}{{- if ne (default "" $proxy.Fingerprint) "" }}, client-fingerprint: {{ $proxy.Fingerprint }}{{- end }}{{- if and (eq $proxy.Security "reality") (ne (default "" $proxy.RealityPublicKey) "") }}, tls: true, reality-opts: { public-key: {{ $proxy.RealityPublicKey }}{{- if ne (default "" $proxy.RealityShortId) "" }}, short-id: {{ $proxy.RealityShortId }}{{- end }} }{{- end }}{{- if ne (default "" $proxy.Flow) "none" }}, flow: {{ $proxy.Flow }}{{- end }} }
-  {{- else if eq $proxy.Type "trojan" }}
-  - { name: {{ $proxy.Name | quote }}, type: trojan, server: {{ $server }}, port: {{ $proxy.Port }}, password: {{ $password }}, {{ $common }}{{- if ne (default "" $proxy.SNI) "" }}, sni: {{ $proxy.SNI }}{{- end }}{{- if $SkipVerify }}, skip-cert-verify: true{{- end }}{{- if ne (default "" $proxy.Fingerprint) "" }}, fingerprint: {{ $proxy.Fingerprint }}{{- end }}{{- if and (eq $proxy.Security "reality") (ne (default "" $proxy.RealityPublicKey) "") }}, reality-opts: { public-key: {{ $proxy.RealityPublicKey }}{{- if ne (default "" $proxy.RealityShortId) "" }}, short-id: {{ $proxy.RealityShortId }}{{- end }} }{{- end }}{{- if or (eq $proxy.Transport "ws") (eq $proxy.Transport "websocket") }}, network: ws, ws-opts: { path: {{ default "/" $proxy.Path }}{{- if ne (default "" $proxy.Host) "" }}, headers: { Host: {{ $proxy.Host }} }{{- end }} }{{- else if eq $proxy.Transport "http" }}, network: http, http-opts: { method: GET, path: [{{ default "/" $proxy.Path | quote }}]{{- if ne (default "" $proxy.Host) "" }}, headers: { Host: [{{ $proxy.Host | quote }}] }{{- end }} }{{- else if eq $proxy.Transport "grpc" }}, network: grpc, grpc-opts: { grpc-service-name: {{ default "grpc" $proxy.ServiceName }} }{{- end }} }
-  {{- else if or (eq $proxy.Type "hysteria2") (eq $proxy.Type "hysteria") }}
-  - { name: {{ $proxy.Name | quote }}, type: hysteria2, server: {{ $server }}, port: {{ $proxy.Port }}, password: {{ $password }}, {{ $common }}{{- if ne (default "" $proxy.SNI) "" }}, sni: {{ $proxy.SNI }}{{- end }}{{- if $proxy.AllowInsecure }}, skip-cert-verify: true{{- end }}{{- if ne (default "" $proxy.ObfsPassword) "" }}, obfs: salamander, obfs-password: {{ $proxy.ObfsPassword }}{{- end }}{{- if ne (default "" $proxy.HopPorts) "" }}, ports: {{ $proxy.HopPorts }}{{- end }}{{- if ne (default 0 $proxy.HopInterval) 0 }}, hop-interval: {{ $proxy.HopInterval }}{{- end }} }
-  {{- else if eq $proxy.Type "tuic" }}
-  - { name: {{ $proxy.Name | quote }}, type: tuic, server: {{ $server }}, port: {{ $proxy.Port }}, uuid: {{ default "" $proxy.ServerKey }}, password: {{ $password }}, {{ $common }}{{- if ne (default "" $proxy.SNI) "" }}, sni: {{ $proxy.SNI }}{{- end }}{{- if $proxy.AllowInsecure }}, skip-cert-verify: true{{- end }}{{- if $proxy.DisableSNI }}, disable-sni: true{{- end }}{{- if $proxy.ReduceRtt }}, reduce-rtt: true{{- end }}{{- if ne (default "" $proxy.UDPRelayMode) "" }}, udp-relay-mode: {{ $proxy.UDPRelayMode }}{{- end }}{{- if ne (default "" $proxy.CongestionController) "" }}, congestion-controller: {{ $proxy.CongestionController }}{{- end }} }
-  {{- else if eq $proxy.Type "wireguard" }}
-  - { name: {{ $proxy.Name | quote }}, type: wireguard, server: {{ $server }}, port: {{ $proxy.Port }}, private-key: {{ default "" $proxy.ServerKey }}, public-key: {{ default "" $proxy.RealityPublicKey }}, {{ $common }}{{- if ne (default "" $proxy.Path) "" }}, preshared-key: {{ $proxy.Path }}{{- end }}{{- if ne (default "" $proxy.RealityServerAddr) "" }}, ip: {{ $proxy.RealityServerAddr }}{{- end }}{{- if ne (default 0 $proxy.RealityServerPort) 0 }}, ipv6: {{ $proxy.RealityServerPort }}{{- end }} }
-  {{- else if eq $proxy.Type "anytls" }}
-  - { name: {{ $proxy.Name | quote }}, type: anytls, server: {{ $server }}, port: {{ $proxy.Port }}, password: {{ $password }}, {{ $common }}{{- if ne (default "" $proxy.SNI) "" }}, sni: {{ $proxy.SNI }}{{- end }}{{- if $proxy.AllowInsecure }}, skip-cert-verify: true{{- end }}{{- if ne (default "" $proxy.Fingerprint) "" }}, fingerprint: {{ $proxy.Fingerprint }}{{- end }} }
-  {{- else }}
-  - { name: {{ $proxy.Name | quote }}, type: {{ $proxy.Type }}, server: {{ $server }}, port: {{ $proxy.Port }}, {{ $common }} }
+{{- if eq $proxy.Type "shadowsocks" }}
+- name: {{ $proxy.Name | quote }}
+  type: ss
+  server: {{ $server }}
+  port: {{ $proxy.Port }}
+  cipher: {{ default "aes-128-gcm" $proxy.Method }}
+  password: {{ $password }}
+  udp: true
+  tfo: true
+  {{- if ne (default "" $proxy.Obfs) "" }}
+  plugin: obfs
+  plugin-opts:
+    mode: {{ $proxy.Obfs }}
+    host: {{ default "" $proxy.ObfsHost }}
   {{- end }}
+{{- else if eq $proxy.Type "vmess" }}
+- name: {{ $proxy.Name | quote }}
+  type: vmess
+  server: {{ $server }}
+  port: {{ $proxy.Port }}
+  uuid: {{ $password }}
+  alterId: 0
+  cipher: auto
+  udp: true
+  tfo: true
+  {{- if or (eq $proxy.Transport "websocket") (eq $proxy.Transport "ws") }}
+  network: ws
+  ws-opts:
+    path: {{ default "/" $proxy.Path }}
+    {{- if ne (default "" $proxy.Host) "" }}
+    headers:
+      Host: {{ $proxy.Host }}
+    {{- end }}
+  {{- else if eq $proxy.Transport "http" }}
+  network: http
+  http-opts:
+    method: GET
+    path: [{{ default "/" $proxy.Path | quote }}]
+    {{- if ne (default "" $proxy.Host) "" }}
+    headers:
+      Host: [{{ $proxy.Host | quote }}]
+    {{- end }}
+  {{- else if eq $proxy.Transport "grpc" }}
+  network: grpc
+  grpc-opts:
+    grpc-service-name: {{ default "grpc" $proxy.ServiceName }}
   {{- end }}
+  {{- if or (eq $proxy.Security "tls") (eq $proxy.Security "reality") }}
+  tls: true
+  {{- end }}
+  {{- if ne (default "" $proxy.SNI) "" }}
+  servername: {{ $proxy.SNI }}
+  {{- end }}
+  {{- if $SkipVerify }}
+  skip-cert-verify: true
+  {{- end }}
+  {{- if ne (default "" $proxy.Fingerprint) "" }}
+  client-fingerprint: {{ $proxy.Fingerprint }}
+  {{- end }}
+{{- else if eq $proxy.Type "vless" }}
+  {{- $encryptionStr := "" -}}
+  {{- $encryption := default "none" $proxy.Encryption -}}
+  {{- if eq $encryption "none" -}}
+    {{- $encryptionStr = "none" -}}
+  {{- else -}}
+    {{- $encParts := list -}}
+    {{- $encParts = append $encParts $encryption -}}
+    {{- if ne (default "" $proxy.Encryption_Mode) "" -}}
+      {{- $encParts = append $encParts $proxy.Encryption_Mode -}}
+    {{- end -}}
+    {{- if ne (default "" $proxy.EncryptionRtt) "" -}}
+      {{- $encParts = append $encParts $proxy.EncryptionRtt -}}
+    {{- end -}}
+    {{- if ne (default "" $proxy.EncryptionClientPadding) "" -}}
+      {{- $encParts = append $encParts $proxy.EncryptionClientPadding -}}
+    {{- end -}}
+    {{- if ne (default "" $proxy.EncryptionPassword) "" -}}
+      {{- $encParts = append $encParts $proxy.EncryptionPassword -}}
+    {{- end -}}
+    {{- $encryptionStr = join "." $encParts -}}
+  {{- end }}
+- name: {{ $proxy.Name | quote }}
+  type: vless
+  server: {{ $server }}
+  port: {{ $proxy.Port }}
+  uuid: {{ $password }}
+  udp: true
+  tfo: true
+  encryption: {{ $encryptionStr }}
+  {{- if ne (default "" $proxy.Flow) "" }}
+  flow: {{ $proxy.Flow }}
+  {{- end }}
+  {{- if or (eq $proxy.Transport "ws") (eq $proxy.Transport "websocket") }}
+  network: ws
+  ws-opts:
+    path: {{ default "/" $proxy.Path }}
+    {{- if ne (default "" $proxy.Host) "" }}
+    headers:
+      Host: {{ $proxy.Host }}
+    {{- end }}
+  {{- else if eq $proxy.Transport "http" }}
+  network: http
+  http-opts:
+    method: GET
+    path: [{{ default "/" $proxy.Path | quote }}]
+    {{- if ne (default "" $proxy.Host) "" }}
+    headers:
+      Host: [{{ $proxy.Host | quote }}]
+    {{- end }}
+  {{- else if eq $proxy.Transport "httpupgrade" }}
+  network: httpupgrade
+  httpupgrade-opts:
+    path: {{ default "/" $proxy.Path }}
+    {{- if ne (default "" $proxy.Host) "" }}
+    headers:
+      Host: {{ $proxy.Host }}
+    {{- end }}
+  {{- else if eq $proxy.Transport "xhttp" }}
+  network: xhttp
+  xhttp-opts:
+    path: {{ default "/" $proxy.Path }}
+    {{- if ne (default "" $proxy.Host) "" }}
+    headers:
+      Host: {{ $proxy.Host }}
+    {{- end }}
+  {{- else if eq $proxy.Transport "grpc" }}
+  network: grpc
+  grpc-opts:
+    grpc-service-name: {{ default "grpc" $proxy.ServiceName }}
+  {{- end }}
+  {{- if or (eq $proxy.Security "tls") (eq $proxy.Security "reality") }}
+  tls: true
+  {{- end }}
+  {{- if ne (default "" $proxy.SNI) "" }}
+  servername: {{ $proxy.SNI }}
+  {{- end }}
+  {{- if $proxy.AllowInsecure }}
+  skip-cert-verify: true
+  {{- end }}
+  {{- if ne (default "" $proxy.Fingerprint) "" }}
+  client-fingerprint: {{ $proxy.Fingerprint }}
+  {{- end }}
+  {{- if and (eq $proxy.Security "reality") (ne (default "" $proxy.RealityPublicKey) "") }}
+  reality-opts:
+    public-key: {{ $proxy.RealityPublicKey }}
+    {{- if ne (default "" $proxy.RealityShortId) "" }}
+    short-id: {{ $proxy.RealityShortId }}
+    {{- end }}
+  {{- end }}
+{{- else if eq $proxy.Type "trojan" }}
+- name: {{ $proxy.Name | quote }}
+  type: trojan
+  server: {{ $server }}
+  port: {{ $proxy.Port }}
+  password: {{ $password }}
+  udp: true
+  tfo: true
+  {{- if or (eq $proxy.Security "tls") (eq $proxy.Security "reality") }}
+  tls: true
+  {{- end }}
+  {{- if ne (default "" $proxy.SNI) "" }}
+  sni: {{ $proxy.SNI }}
+  {{- end }}
+  {{- if $SkipVerify }}
+  skip-cert-verify: true
+  {{- end }}
+  {{- if ne (default "" $proxy.Fingerprint) "" }}
+  client-fingerprint: {{ $proxy.Fingerprint }}
+  {{- end }}
+  {{- if and (eq $proxy.Security "reality") (ne (default "" $proxy.RealityPublicKey) "") }}
+  reality-opts:
+    public-key: {{ $proxy.RealityPublicKey }}
+    {{- if ne (default "" $proxy.RealityShortId) "" }}
+    short-id: {{ $proxy.RealityShortId }}
+    {{- end }}
+  {{- end }}
+  {{- if or (eq $proxy.Transport "ws") (eq $proxy.Transport "websocket") }}
+  network: ws
+  ws-opts:
+    path: {{ default "/" $proxy.Path }}
+    {{- if ne (default "" $proxy.Host) "" }}
+    headers:
+      Host: {{ $proxy.Host }}
+    {{- end }}
+  {{- else if eq $proxy.Transport "http" }}
+  network: http
+  http-opts:
+    method: GET
+    path: [{{ default "/" $proxy.Path | quote }}]
+    {{- if ne (default "" $proxy.Host) "" }}
+    headers:
+      Host: [{{ $proxy.Host | quote }}]
+    {{- end }}
+  {{- else if eq $proxy.Transport "grpc" }}
+  network: grpc
+  grpc-opts:
+    grpc-service-name: {{ default "grpc" $proxy.ServiceName }}
+  {{- end }}
+{{- else if or (eq $proxy.Type "hysteria2") (eq $proxy.Type "hysteria") }}
+- name: {{ $proxy.Name | quote }}
+  type: hysteria2
+  server: {{ $server }}
+  port: {{ $proxy.Port }}
+  password: {{ $password }}
+  udp: true
+  tfo: true
+  {{- if ne (default "" $proxy.SNI) "" }}
+  sni: {{ $proxy.SNI }}
+  {{- end }}
+  {{- if $proxy.AllowInsecure }}
+  skip-cert-verify: true
+  {{- end }}
+  {{- if ne (default "" $proxy.ObfsPassword) "" }}
+  obfs: salamander
+  obfs-password: {{ $proxy.ObfsPassword }}
+  {{- end }}
+  {{- if ne (default "" $proxy.HopPorts) "" }}
+  ports: {{ $proxy.HopPorts }}
+  {{- end }}
+  {{- if ne (default 0 $proxy.HopInterval) 0 }}
+  hop-interval: {{ $proxy.HopInterval }}
+  {{- end }}
+  {{- if ne (default "" (printf "%v" $proxy.UpMbps)) "" }}
+  up: "{{ $proxy.UpMbps }} Mbps"
+  {{- end }}
+  {{- if ne (default "" (printf "%v" $proxy.DownMbps)) "" }}
+  down: "{{ $proxy.DownMbps }} Mbps"
+  {{- end }}
+{{- else if eq $proxy.Type "tuic" }}
+- name: {{ $proxy.Name | quote }}
+  type: tuic
+  server: {{ $server }}
+  port: {{ $proxy.Port }}
+  uuid: {{ default "" $proxy.ServerKey }}
+  password: {{ $password }}
+  udp: true
+  tfo: true
+  {{- if ne (default "" $proxy.SNI) "" }}
+  sni: {{ $proxy.SNI }}
+  {{- end }}
+  {{- if $proxy.AllowInsecure }}
+  skip-cert-verify: true
+  {{- end }}
+  {{- if $proxy.DisableSNI }}
+  disable-sni: true
+  {{- end }}
+  {{- if $proxy.ReduceRtt }}
+  reduce-rtt: true
+  {{- end }}
+  {{- if ne (default "" $proxy.UDPRelayMode) "" }}
+  udp-relay-mode: {{ $proxy.UDPRelayMode }}
+  {{- end }}
+  {{- if ne (default "" $proxy.CongestionController) "" }}
+  congestion-controller: {{ $proxy.CongestionController }}
+  {{- end }}
+{{- else if eq $proxy.Type "wireguard" }}
+- name: {{ $proxy.Name | quote }}
+  type: wireguard
+  server: {{ $server }}
+  port: {{ $proxy.Port }}
+  private-key: {{ default "" $proxy.ServerKey }}
+  public-key: {{ default "" $proxy.RealityPublicKey }}
+  udp: true
+  tfo: true
+  {{- if ne (default "" $proxy.Path) "" }}
+  preshared-key: {{ $proxy.Path }}
+  {{- end }}
+  {{- if ne (default "" $proxy.RealityServerAddr) "" }}
+  ip: {{ $proxy.RealityServerAddr }}
+  {{- end }}
+  {{- if ne (default 0 $proxy.RealityServerPort) 0 }}
+  ipv6: {{ $proxy.RealityServerPort }}
+  {{- end }}
+{{- else if eq $proxy.Type "anytls" }}
+- name: {{ $proxy.Name | quote }}
+  type: anytls
+  server: {{ $server }}
+  port: {{ $proxy.Port }}
+  password: {{ $password }}
+  udp: true
+  tfo: true
+  {{- if ne (default "" $proxy.SNI) "" }}
+  sni: {{ $proxy.SNI }}
+  {{- end }}
+  {{- if $proxy.AllowInsecure }}
+  skip-cert-verify: true
+  {{- end }}
+  {{- if ne (default "" $proxy.Fingerprint) "" }}
+  client-fingerprint: {{ $proxy.Fingerprint }}
+  {{- end }}
+{{- else }}
+- name: {{ $proxy.Name | quote }}
+  type: {{ $proxy.Type }}
+  server: {{ $server }}
+  port: {{ $proxy.Port }}
+  udp: true
+  tfo: true
 {{- end }}
-
+{{- end }}
+{{- end }}
 {{- $allProxyNames := list -}}
 {{- range $proxy := $supportedProxies -}}
   {{- $allProxyNames = append $allProxyNames $proxy.Name -}}
