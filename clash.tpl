@@ -207,9 +207,9 @@ All: &All
 proxies:
 {{- range $proxy := $renderProxies }}
   {{- if or (eq $proxy.Type "direct") (eq $proxy.Type "reject") (eq $proxy.Type "dns") }}
-  - name: {{ $proxy.Name | quote }}
-    type: {{ $proxy.Type }}
-    udp: true
+- name: {{ $proxy.Name | quote }}
+  type: {{ $proxy.Type }}
+  udp: true
   {{- else -}}
   {{- $server := $proxy.Server -}}
   {{- if and (contains $server ":") (not (hasPrefix "[" $server)) -}}
