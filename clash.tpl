@@ -606,6 +606,11 @@ proxy-groups:
 {{- end }}
 
 {{- end }}
+
+  - name: Emby
+    icon: "https://pub-3bc052f476d54f37991b15cf3d584fef.r2.dev/emby.svg"
+    <<: *proxy_groups
+
   - name: 小红书
     icon: "https://cdn.jsdelivr.net/gh/GitMetaio/Surfing@rm/Home/icon/XiaoHongShu.svg"
     <<: *proxy_groups
@@ -763,6 +768,14 @@ rule-providers:
     behavior: classical
     format: text
     path: ./etc/自定义规则.list # 请按路径新建文件及建立你需要的规则
+
+  Emby_Custom:
+    type: http
+    behavior: classical
+    format: text
+    interval: 86400
+    path: ./rules/Emby_Custom.list
+    url: "https://raw.githubusercontent.com/pjy02/Self-use-rules/refs/heads/master/emby.list"
 
   WebRTC_端/域:
     type: http
@@ -1041,6 +1054,8 @@ rules:
 
   - RULE-SET,WebRTC_端/域,WebRTC
   - RULE-SET,No-ads-all_域,广告拦截
+
+  - RULE-SET,Emby_Custom,Emby
 
   - PROCESS-NAME,com.ss.android.ugc.aweme,抖音
   - RULE-SET,DouYin_域,抖音
