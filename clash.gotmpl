@@ -540,6 +540,22 @@ proxies:
 
 # —————————
 
+proxy_groups: &proxy_groups
+  type: select
+  proxies:
+    - 总模式
+    - ALL·延迟最低
+    - ALL·负载均衡
+    - ALL·故障转移
+    - ALL·香港地区
+    - ALL·日本地区
+    - ALL·中国台湾
+    - ALL·美国地区
+    - ALL·狮城地区
+    - ALL·其它地区
+    - ⛔️ 禁止·拒绝连接
+    - 🌐 本机·本地直连
+
 proxy-groups:
   - name: 总模式
     icon: "https://cdn.jsdelivr.net/gh/GitMetaio/Surfing@rm/Home/icon/All.svg"
@@ -631,360 +647,87 @@ proxy-groups:
 
   - name: Emby
     icon: "https://pub-3bc052f476d54f37991b15cf3d584fef.r2.dev/emby.svg"
-    type: select
-    proxies:
-      - 总模式
-      - ALL·延迟最低
-      - ALL·负载均衡
-      - ALL·故障转移
-      - ALL·香港地区
-      - ALL·日本地区
-      - ALL·中国台湾
-      - ALL·美国地区
-      - ALL·狮城地区
-      - ALL·其它地区
-      - ⛔️ 禁止·拒绝连接
-      - 🌐 本机·本地直连
+    <<: *proxy_groups
 
   - name: 小红书
     icon: "https://cdn.jsdelivr.net/gh/GitMetaio/Surfing@rm/Home/icon/XiaoHongShu.svg"
-    type: select
-    proxies:
-      - 总模式
-      - ALL·延迟最低
-      - ALL·负载均衡
-      - ALL·故障转移
-      - ALL·香港地区
-      - ALL·日本地区
-      - ALL·中国台湾
-      - ALL·美国地区
-      - ALL·狮城地区
-      - ALL·其它地区
-      - ⛔️ 禁止·拒绝连接
-      - 🌐 本机·本地直连
+    <<: *proxy_groups
 
   - name: 抖音
     icon: "https://cdn.jsdelivr.net/gh/GitMetaio/Surfing@rm/Home/icon/DouYin.svg"
-    type: select
-    proxies:
-      - 总模式
-      - ALL·延迟最低
-      - ALL·负载均衡
-      - ALL·故障转移
-      - ALL·香港地区
-      - ALL·日本地区
-      - ALL·中国台湾
-      - ALL·美国地区
-      - ALL·狮城地区
-      - ALL·其它地区
-      - ⛔️ 禁止·拒绝连接
-      - 🌐 本机·本地直连
+    <<: *proxy_groups
 
   - name: BiliBili
     icon: "https://cdn.jsdelivr.net/gh/GitMetaio/Surfing@rm/Home/icon/BiliBili.svg"
-    type: select
-    proxies:
-      - 总模式
-      - ALL·延迟最低
-      - ALL·负载均衡
-      - ALL·故障转移
-      - ALL·香港地区
-      - ALL·日本地区
-      - ALL·中国台湾
-      - ALL·美国地区
-      - ALL·狮城地区
-      - ALL·其它地区
-      - ⛔️ 禁止·拒绝连接
-      - 🌐 本机·本地直连
+    <<: *proxy_groups
 
   - name: Steam
     icon: "https://cdn.jsdelivr.net/gh/GitMetaio/Surfing@rm/Home/icon/Steam.svg"
-    type: select
-    proxies:
-      - 总模式
-      - ALL·延迟最低
-      - ALL·负载均衡
-      - ALL·故障转移
-      - ALL·香港地区
-      - ALL·日本地区
-      - ALL·中国台湾
-      - ALL·美国地区
-      - ALL·狮城地区
-      - ALL·其它地区
-      - ⛔️ 禁止·拒绝连接
-      - 🌐 本机·本地直连
+    <<: *proxy_groups
 
   - name: Apple
     icon: "https://cdn.jsdelivr.net/gh/GitMetaio/Surfing@rm/Home/icon/Apple.svg"
-    type: select
-    proxies:
-      - 总模式
-      - ALL·延迟最低
-      - ALL·负载均衡
-      - ALL·故障转移
-      - ALL·香港地区
-      - ALL·日本地区
-      - ALL·中国台湾
-      - ALL·美国地区
-      - ALL·狮城地区
-      - ALL·其它地区
-      - ⛔️ 禁止·拒绝连接
-      - 🌐 本机·本地直连
+    <<: *proxy_groups
 
   - name: Microsoft
     icon: "https://cdn.jsdelivr.net/gh/GitMetaio/Surfing@rm/Home/icon/Microsoft.svg"
-    type: select
-    proxies:
-      - 总模式
-      - ALL·延迟最低
-      - ALL·负载均衡
-      - ALL·故障转移
-      - ALL·香港地区
-      - ALL·日本地区
-      - ALL·中国台湾
-      - ALL·美国地区
-      - ALL·狮城地区
-      - ALL·其它地区
-      - ⛔️ 禁止·拒绝连接
-      - 🌐 本机·本地直连
+    <<: *proxy_groups
 
   - name: Telegram
     icon: "https://cdn.jsdelivr.net/gh/GitMetaio/Surfing@rm/Home/icon/Telegram.svg"
-    type: select
-    proxies:
-      - 总模式
-      - ALL·延迟最低
-      - ALL·负载均衡
-      - ALL·故障转移
-      - ALL·香港地区
-      - ALL·日本地区
-      - ALL·中国台湾
-      - ALL·美国地区
-      - ALL·狮城地区
-      - ALL·其它地区
-      - ⛔️ 禁止·拒绝连接
-      - 🌐 本机·本地直连
+    <<: *proxy_groups
 
   - name: Discord
     icon: "https://cdn.jsdelivr.net/gh/GitMetaio/Surfing@rm/Home/icon/Discord.svg"
-    type: select
-    proxies:
-      - 总模式
-      - ALL·延迟最低
-      - ALL·负载均衡
-      - ALL·故障转移
-      - ALL·香港地区
-      - ALL·日本地区
-      - ALL·中国台湾
-      - ALL·美国地区
-      - ALL·狮城地区
-      - ALL·其它地区
-      - ⛔️ 禁止·拒绝连接
-      - 🌐 本机·本地直连
+    <<: *proxy_groups
 
   - name: Spotify
     icon: "https://cdn.jsdelivr.net/gh/GitMetaio/Surfing@rm/Home/icon/Spotify.svg"
-    type: select
-    proxies:
-      - 总模式
-      - ALL·延迟最低
-      - ALL·负载均衡
-      - ALL·故障转移
-      - ALL·香港地区
-      - ALL·日本地区
-      - ALL·中国台湾
-      - ALL·美国地区
-      - ALL·狮城地区
-      - ALL·其它地区
-      - ⛔️ 禁止·拒绝连接
-      - 🌐 本机·本地直连
+    <<: *proxy_groups
 
   - name: TikTok
     icon: "https://cdn.jsdelivr.net/gh/GitMetaio/Surfing@rm/Home/icon/TikTok.svg"
-    type: select
-    proxies:
-      - 总模式
-      - ALL·延迟最低
-      - ALL·负载均衡
-      - ALL·故障转移
-      - ALL·香港地区
-      - ALL·日本地区
-      - ALL·中国台湾
-      - ALL·美国地区
-      - ALL·狮城地区
-      - ALL·其它地区
-      - ⛔️ 禁止·拒绝连接
-      - 🌐 本机·本地直连
+    <<: *proxy_groups
 
   - name: YouTube
     icon: "https://cdn.jsdelivr.net/gh/GitMetaio/Surfing@rm/Home/icon/YouTube.svg"
-    type: select
-    proxies:
-      - 总模式
-      - ALL·延迟最低
-      - ALL·负载均衡
-      - ALL·故障转移
-      - ALL·香港地区
-      - ALL·日本地区
-      - ALL·中国台湾
-      - ALL·美国地区
-      - ALL·狮城地区
-      - ALL·其它地区
-      - ⛔️ 禁止·拒绝连接
-      - 🌐 本机·本地直连
+    <<: *proxy_groups
 
   - name: Netflix
     icon: "https://cdn.jsdelivr.net/gh/GitMetaio/Surfing@rm/Home/icon/Netflix.svg"
-    type: select
-    proxies:
-      - 总模式
-      - ALL·延迟最低
-      - ALL·负载均衡
-      - ALL·故障转移
-      - ALL·香港地区
-      - ALL·日本地区
-      - ALL·中国台湾
-      - ALL·美国地区
-      - ALL·狮城地区
-      - ALL·其它地区
-      - ⛔️ 禁止·拒绝连接
-      - 🌐 本机·本地直连
+    <<: *proxy_groups
 
   - name: Google
     icon: "https://cdn.jsdelivr.net/gh/GitMetaio/Surfing@rm/Home/icon/Google.svg"
-    type: select
-    proxies:
-      - 总模式
-      - ALL·延迟最低
-      - ALL·负载均衡
-      - ALL·故障转移
-      - ALL·香港地区
-      - ALL·日本地区
-      - ALL·中国台湾
-      - ALL·美国地区
-      - ALL·狮城地区
-      - ALL·其它地区
-      - ⛔️ 禁止·拒绝连接
-      - 🌐 本机·本地直连
+    <<: *proxy_groups
 
   - name: GoogleFCM
     icon: "https://cdn.jsdelivr.net/gh/GitMetaio/Surfing@rm/Home/icon/GoogleFCM.svg"
-    type: select
-    proxies:
-      - 总模式
-      - ALL·延迟最低
-      - ALL·负载均衡
-      - ALL·故障转移
-      - ALL·香港地区
-      - ALL·日本地区
-      - ALL·中国台湾
-      - ALL·美国地区
-      - ALL·狮城地区
-      - ALL·其它地区
-      - ⛔️ 禁止·拒绝连接
-      - 🌐 本机·本地直连
+    <<: *proxy_groups
 
   - name: Facebook
     icon: "https://cdn.jsdelivr.net/gh/GitMetaio/Surfing@rm/Home/icon/Facebook.svg"
-    type: select
-    proxies:
-      - 总模式
-      - ALL·延迟最低
-      - ALL·负载均衡
-      - ALL·故障转移
-      - ALL·香港地区
-      - ALL·日本地区
-      - ALL·中国台湾
-      - ALL·美国地区
-      - ALL·狮城地区
-      - ALL·其它地区
-      - ⛔️ 禁止·拒绝连接
-      - 🌐 本机·本地直连
+    <<: *proxy_groups
 
   - name: OpenAI
     icon: "https://cdn.jsdelivr.net/gh/GitMetaio/Surfing@rm/Home/icon/OpenAI.svg"
-    type: select
-    proxies:
-      - 总模式
-      - ALL·延迟最低
-      - ALL·负载均衡
-      - ALL·故障转移
-      - ALL·香港地区
-      - ALL·日本地区
-      - ALL·中国台湾
-      - ALL·美国地区
-      - ALL·狮城地区
-      - ALL·其它地区
-      - ⛔️ 禁止·拒绝连接
-      - 🌐 本机·本地直连
+    <<: *proxy_groups
 
   - name: GitHub
     icon: "https://cdn.jsdelivr.net/gh/GitMetaio/Surfing@rm/Home/icon/GitHub.svg"
-    type: select
-    proxies:
-      - 总模式
-      - ALL·延迟最低
-      - ALL·负载均衡
-      - ALL·故障转移
-      - ALL·香港地区
-      - ALL·日本地区
-      - ALL·中国台湾
-      - ALL·美国地区
-      - ALL·狮城地区
-      - ALL·其它地区
-      - ⛔️ 禁止·拒绝连接
-      - 🌐 本机·本地直连
+    <<: *proxy_groups
 
   - name: Twitter(X)
     icon: "https://cdn.jsdelivr.net/gh/GitMetaio/Surfing@rm/Home/icon/Twitter.svg"
-    type: select
-    proxies:
-      - 总模式
-      - ALL·延迟最低
-      - ALL·负载均衡
-      - ALL·故障转移
-      - ALL·香港地区
-      - ALL·日本地区
-      - ALL·中国台湾
-      - ALL·美国地区
-      - ALL·狮城地区
-      - ALL·其它地区
-      - ⛔️ 禁止·拒绝连接
-      - 🌐 本机·本地直连
+    <<: *proxy_groups
 
   - name: DNS连接
     icon: "https://cdn.jsdelivr.net/gh/GitMetaio/Surfing@rm/Home/icon/DNS.svg"
-    type: select
-    proxies:
-      - 总模式
-      - ALL·延迟最低
-      - ALL·负载均衡
-      - ALL·故障转移
-      - ALL·香港地区
-      - ALL·日本地区
-      - ALL·中国台湾
-      - ALL·美国地区
-      - ALL·狮城地区
-      - ALL·其它地区
-      - ⛔️ 禁止·拒绝连接
-      - 🌐 本机·本地直连
+    <<: *proxy_groups
 
   - name: 漏网之鱼
     icon: "https://cdn.jsdelivr.net/gh/GitMetaio/Surfing@rm/Home/icon/HBASE-copy.svg"
-    type: select
-    proxies:
-      - 总模式
-      - ALL·延迟最低
-      - ALL·负载均衡
-      - ALL·故障转移
-      - ALL·香港地区
-      - ALL·日本地区
-      - ALL·中国台湾
-      - ALL·美国地区
-      - ALL·狮城地区
-      - ALL·其它地区
-      - ⛔️ 禁止·拒绝连接
-      - 🌐 本机·本地直连
+    <<: *proxy_groups
 
   - name: 广告拦截
     icon: "https://cdn.jsdelivr.net/gh/GitMetaio/Surfing@rm/Home/icon/No-ads-all.svg"
