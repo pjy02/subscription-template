@@ -786,45 +786,6 @@ proxy-groups:
       - '🌐 本机·本地直连'
       - '⛔️ 禁止·拒绝连接'
 
-rules:
-  - DST-PORT,53,🌐 DNS_Hijack
-  - DST-PORT,853,DNS连接
-  - RULE-SET,WebRTC_端域,WebRTC
-  - RULE-SET,GoogleFCM_域,GoogleFCM
-  - RULE-SET,YouTube_域,YouTube
-  - RULE-SET,Google_域,Google
-  - RULE-SET,Google_IP,Google,no-resolve
-  - RULE-SET,No-ads-all_域,广告拦截
-  - PROCESS-NAME,com.ss.android.ugc.aweme,抖音
-  - RULE-SET,DouYin_域,抖音
-  - PROCESS-NAME,com.xingin.xhs,小红书
-  - RULE-SET,XiaoHongShu_域,小红书
-  - PROCESS-NAME,tv.danmaku.bili,BiliBili
-  - RULE-SET,BiliBili_域,BiliBili
-  - RULE-SET,BiliBili_IP,BiliBili,no-resolve
-  - RULE-SET,Steam_域,Steam
-  - RULE-SET,GitHub_域,GitHub
-  - RULE-SET,Discord_域,Discord
-  - RULE-SET,TikTok_域,TikTok
-  - RULE-SET,Twitter_域,Twitter(X)
-  - RULE-SET,Twitter_IP,Twitter(X),no-resolve
-  - RULE-SET,Netflix_域,Netflix
-  - RULE-SET,Netflix_IP,Netflix,no-resolve
-  - RULE-SET,Spotify_域,Spotify
-  - RULE-SET,Facebook_域,Facebook
-  - RULE-SET,Facebook_IP,Facebook,no-resolve
-  - RULE-SET,OpenAI_域,OpenAI
-  - RULE-SET,Apple_域,Apple
-  - RULE-SET,Apple_IP,Apple,no-resolve
-  - RULE-SET,Microsoft_域,Microsoft
-  - RULE-SET,Telegram_域,Telegram
-  - RULE-SET,Telegram_IP,Telegram,no-resolve
-  - RULE-SET,Private_域,🌐 本机·本地直连
-  - RULE-SET,Private_IP,🌐 本机·本地直连,no-resolve
-  - RULE-SET,CN_域,🌐 本机·本地直连
-  - RULE-SET,CN_IP,🌐 本机·本地直连,no-resolve
-  - MATCH,漏网之鱼
-
 rule-providers:
   WebRTC_端域:
     type: http
@@ -959,6 +920,45 @@ rule-providers:
     <<: *ip_provider
     path: ./rules/Private_IP.mrs
     url: 'https://cdn.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo-lite/geoip/private.mrs'
+
+rules:
+  - DST-PORT,53,🌐 DNS_Hijack
+  - DST-PORT,853,DNS连接
+  - RULE-SET,WebRTC_端域,WebRTC
+  - RULE-SET,GoogleFCM_域,GoogleFCM
+  - RULE-SET,YouTube_域,YouTube
+  - RULE-SET,Google_域,Google
+  - RULE-SET,Google_IP,Google,no-resolve
+  - RULE-SET,No-ads-all_域,广告拦截
+  - PROCESS-NAME,com.ss.android.ugc.aweme,抖音
+  - RULE-SET,DouYin_域,抖音
+  - PROCESS-NAME,com.xingin.xhs,小红书
+  - RULE-SET,XiaoHongShu_域,小红书
+  - PROCESS-NAME,tv.danmaku.bili,BiliBili
+  - RULE-SET,BiliBili_域,BiliBili
+  - RULE-SET,BiliBili_IP,BiliBili,no-resolve
+  - RULE-SET,Steam_域,Steam
+  - RULE-SET,GitHub_域,GitHub
+  - RULE-SET,Discord_域,Discord
+  - RULE-SET,TikTok_域,TikTok
+  - RULE-SET,Twitter_域,Twitter(X)
+  - RULE-SET,Twitter_IP,Twitter(X),no-resolve
+  - RULE-SET,Netflix_域,Netflix
+  - RULE-SET,Netflix_IP,Netflix,no-resolve
+  - RULE-SET,Spotify_域,Spotify
+  - RULE-SET,Facebook_域,Facebook
+  - RULE-SET,Facebook_IP,Facebook,no-resolve
+  - RULE-SET,OpenAI_域,OpenAI
+  - RULE-SET,Apple_域,Apple
+  - RULE-SET,Apple_IP,Apple,no-resolve
+  - RULE-SET,Microsoft_域,Microsoft
+  - RULE-SET,Telegram_域,Telegram
+  - RULE-SET,Telegram_IP,Telegram,no-resolve
+  - RULE-SET,Private_域,🌐 本机·本地直连
+  - RULE-SET,Private_IP,🌐 本机·本地直连,no-resolve
+  - RULE-SET,CN_域,🌐 本机·本地直连
+  - RULE-SET,CN_IP,🌐 本机·本地直连,no-resolve
+  - MATCH,漏网之鱼
 url-rewrite:
   - ^https?:\/\/(www.)?g\.cn https://www.google.com 302
   - ^https?:\/\/(www.)?google\.cn https://www.google.com 302
