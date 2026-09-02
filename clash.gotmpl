@@ -127,12 +127,15 @@ dns:
   enhanced-mode: fake-ip
   fake-ip-range: 198.18.0.0/16
   fake-ip-range6: fdfe:dcba:9876::/64
-  fake-ip-filter-mode: rule
+  # blacklist 模式兼容 Clash Windows 客户端自动合并的 +.lan 等域名项。
+  fake-ip-filter-mode: blacklist
   fake-ip-filter:
-    - RULE-SET,CN_域,real-ip
-    - RULE-SET,Private_域,real-ip
-    - RULE-SET,GoogleFCM_域,real-ip
-    - MATCH,fake-ip
+    - '+.lan'
+    - '+.local'
+    - localhost
+    - 'rule-set:CN_域'
+    - 'rule-set:Private_域'
+    - 'rule-set:GoogleFCM_域'
   default-nameserver:
     - 223.5.5.5
     - 119.29.29.29
